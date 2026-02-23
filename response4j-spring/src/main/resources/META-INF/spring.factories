@@ -1,3 +1,0 @@
-# META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports
-
-io.github.iamkavindu.response4j.spring.autoconfigure.Response4jAutoConfiguration
