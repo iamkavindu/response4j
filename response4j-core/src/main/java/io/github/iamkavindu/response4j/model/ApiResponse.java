@@ -50,6 +50,6 @@ public class ApiResponse<T> {
     }
 
     public static <T> ApiResponse<T> noContent() {
-        return empty(204, "Request created successful");
+        return empty(204, "No content");
     }
 }

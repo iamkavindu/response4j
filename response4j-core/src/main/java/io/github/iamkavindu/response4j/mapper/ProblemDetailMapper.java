@@ -4,6 +4,7 @@ import io.github.iamkavindu.response4j.annotation.ProblemResponse;
 import io.github.iamkavindu.response4j.model.ProblemDetail;
 
 import java.net.URI;
+import java.util.Objects;
 
 
 public class ProblemDetailMapper {
@@ -25,7 +26,7 @@ public class ProblemDetailMapper {
                 : annotation.title();
 
         String detail = annotation.detail().isBlank() && annotation.includeExceptionMessage()
-                ? exception.getMessage()
+                ? Objects.requireNonNullElse(exception.getMessage(), "")
                 : annotation.detail();
 
         return ProblemDetail.builder()
@@ -40,8 +41,8 @@ public class ProblemDetailMapper {
         return ProblemDetail.builder()
                 .type(URI.create("about:blank"))
                 .status(500)
-                .title("internal Server Error")
-                .detail(exception.getMessage())
+                .title("Internal Server Error")
+                .detail(Objects.requireNonNullElse(exception.getMessage(), ""))
                 .build();
     }
 }

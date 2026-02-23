@@ -32,7 +32,11 @@ public class Response4jResponseBodyAdvice implements ResponseBodyAdvice<Object> 
     @Override
     public Object beforeBodyWrite(@Nullable Object body, MethodParameter returnType, MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
 
-        if (body instanceof ApiResponse<?>) {
+        if (body instanceof ApiResponse<?> apiResponseBody) {
+            if (apiResponseBody.getStatus() == 204) {
+                response.setStatusCode(HttpStatusCode.valueOf(204));
+                return null;
+            }
             return body;
         }
 
@@ -46,6 +50,9 @@ public class Response4jResponseBodyAdvice implements ResponseBodyAdvice<Object> 
             response.setStatusCode(
                     HttpStatusCode.valueOf(apiResponse.getStatus())
             );
+            if (apiResponse.getStatus() == 204) {
+                return null;
+            }
         }
 
         return apiResponse != null ? apiResponse : body;
