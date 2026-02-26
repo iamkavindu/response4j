@@ -15,6 +15,13 @@ import jakarta.ws.rs.ext.Provider;
 import java.io.IOException;
 import java.lang.reflect.Method;
 
+/**
+ * JAX-RS {@link ContainerResponseFilter} that wraps resource method responses in
+ * {@link ApiResponse} when the method or declaring class is annotated with {@link SuccessResponse}.
+ * <p>
+ * Passes through existing {@code ApiResponse} bodies unchanged. When {@code SuccessResponse}
+ * is absent or the resource method is unknown, leaves the response unchanged.
+ */
 @Provider
 @ApplicationScoped
 public class Response4jContainerResponseFilter implements ContainerResponseFilter {
@@ -24,11 +31,24 @@ public class Response4jContainerResponseFilter implements ContainerResponseFilte
     @Context
     ResourceInfo resourceInfo;
 
+    /**
+     * Creates the filter with the given {@link ApiResponseMapper}.
+     *
+     * @param apiResponseMapper the mapper for converting controller return values to ApiResponse
+     */
     @Inject
     public Response4jContainerResponseFilter(ApiResponseMapper apiResponseMapper) {
         this.apiResponseMapper = apiResponseMapper;
     }
 
+    /**
+     * Wraps the response body in {@link ApiResponse} when the resource method or class has
+     * {@link SuccessResponse}. Updates the response status from the mapped ApiResponse.
+     *
+     * @param requestContext  the request context
+     * @param responseContext the response context (may be modified)
+     * @throws IOException if an I/O error occurs during filtering
+     */
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) throws IOException {
 
