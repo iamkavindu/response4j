@@ -38,6 +38,7 @@
         <module>response4j-core</module>
         <module>response4j-spring</module>
         <module>response4j-quarkus</module>
+        <module>response4j-micronaut</module>
     </modules>
 
     <properties>
