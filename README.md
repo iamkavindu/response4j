@@ -7,6 +7,8 @@ A framework-agnostic Java library for standardized API error responses aligned w
 - **RFC 7807 compliant** — Error responses follow the Problem Details specification
 - **Framework-agnostic core** — Use `response4j-core` with any Java web framework
 - **Spring Boot support** — Optional `response4j-spring` module with auto-configuration
+- **Quarkus support** — Optional `response4j-quarkus` module with CDI producers and JAX-RS integration
+- **Micronaut support** — Optional `response4j-micronaut` module with bean factory, HTTP filter, and exception handler
 - **Simple annotations** — `@SuccessResponse` for success wrapping, `@ProblemResponse` for exception mapping
 - **Consistent structure** — Success and error responses share predictable JSON shapes
 
@@ -21,6 +23,8 @@ A framework-agnostic Java library for standardized API error responses aligned w
 |--------|-------------|
 | `response4j-core` | Core models (`ApiResponse`, `ProblemDetail`), annotations, and mappers. No framework dependencies. |
 | `response4j-spring` | Spring Boot auto-configuration: exception handler, response body advice. Depends on Spring Web MVC and Boot. |
+| `response4j-quarkus` | Quarkus integration: CDI producers for mappers, JAX-RS exception mapper, container response filter. Depends on Quarkus REST (RESTEasy Reactive) and Arc. |
+| `response4j-micronaut` | Micronaut integration: bean factory for mappers, HTTP server filter, exception handler. Depends on Micronaut HTTP, server, and inject. |
 
 ## Installation
 
@@ -44,6 +48,26 @@ Add the dependency for your use case.
 <dependency>
     <groupId>io.github.iamkavindu</groupId>
     <artifactId>response4j-spring</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+</dependency>
+```
+
+**Quarkus** (includes core):
+
+```xml
+<dependency>
+    <groupId>io.github.iamkavindu</groupId>
+    <artifactId>response4j-quarkus</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+</dependency>
+```
+
+**Micronaut** (includes core):
+
+```xml
+<dependency>
+    <groupId>io.github.iamkavindu</groupId>
+    <artifactId>response4j-micronaut</artifactId>
     <version>0.1.0-SNAPSHOT</version>
 </dependency>
 ```
@@ -135,6 +159,55 @@ Unhandled exceptions produce `Content-Type: application/problem+json` with statu
 }
 ```
 
+### Quarkus
+
+With `response4j-quarkus` on the classpath, CDI beans (`ApiResponseMapper`, `ProblemDetailMapper`) are auto-produced. A JAX-RS `ExceptionMapper` and `ContainerResponseFilter` handle exception mapping and `@SuccessResponse` wrapping respectively.
+
+Annotate resource methods or classes with `@SuccessResponse` and exception classes with `@ProblemResponse` the same way as with Spring Boot:
+
+```java
+@Path("/users")
+@SuccessResponse
+public class UserResource {
+
+    @GET
+    @Path("/{id}")
+    public User getUser(@PathParam("id") Long id) {
+        return userService.findById(id);
+    }
+
+    @POST
+    @SuccessResponse(status = 201, message = "User created successfully")
+    public User createUser(UserRequest request) {
+        return userService.create(request);
+    }
+}
+```
+
+### Micronaut
+
+With `response4j-micronaut` on the classpath, a bean factory auto-registers `ApiResponseMapper` and `ProblemDetailMapper` when Micronaut HTTP is present. `Response4jHttpServerFilter` applies `@SuccessResponse` wrapping to controller responses, and `Response4jExceptionHandler` maps exceptions to RFC 7807 Problem Details.
+
+Annotate controller methods or classes with `@SuccessResponse` and exception classes with `@ProblemResponse` the same way as with Spring Boot or Quarkus:
+
+```java
+@Controller("/users")
+@SuccessResponse
+public class UserController {
+
+    @Get("/{id}")
+    public User getUser(@PathVariable Long id) {
+        return userService.findById(id);
+    }
+
+    @Post
+    @SuccessResponse(status = 201, message = "User created successfully")
+    public User createUser(@Body UserRequest request) {
+        return userService.create(request);
+    }
+}
+```
+
 ### Core (framework-agnostic)
 
 Use `response4j-core` without Spring for manual mapping and serialization:
@@ -207,6 +280,16 @@ response4j/
 │   └── src/main/java/.../
 │       ├── autoconfigure/    # Response4jAutoConfiguration
 │       ├── advice/           # Response4jResponseBodyAdvice
+│       └── handler/          # Response4jExceptionHandler
+├── response4j-quarkus/       # Quarkus integration
+│   └── src/main/java/.../
+│       ├── producer/         # Response4jProducer (CDI)
+│       ├── mapper/           # Response4jExceptionMapper
+│       └── filter/           # Response4jContainerResponseFilter
+├── response4j-micronaut/     # Micronaut integration
+│   └── src/main/java/.../
+│       ├── factory/          # ResponseFactory (beans)
+│       ├── filter/           # Response4jHttpServerFilter
 │       └── handler/          # Response4jExceptionHandler
 └── pom.xml
 ```
