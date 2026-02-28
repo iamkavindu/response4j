@@ -1,3 +1,4 @@
+![response4j flow](./docs/response4j-flow.svg)
 # response4j
 
 A framework-agnostic Java library for standardized API error responses aligned with [RFC 7807 Problem Details for HTTP APIs](https://www.rfc-editor.org/rfc/rfc7807).
