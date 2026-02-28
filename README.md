@@ -2,6 +2,8 @@
 
 A framework-agnostic Java library for standardized API error responses aligned with [RFC 7807 Problem Details for HTTP APIs](https://www.rfc-editor.org/rfc/rfc7807).
 
+![response4j flow](./docs/response4j-flow.svg)
+
 ## Features
 
 - **RFC 7807 compliant** — Error responses follow the Problem Details specification
