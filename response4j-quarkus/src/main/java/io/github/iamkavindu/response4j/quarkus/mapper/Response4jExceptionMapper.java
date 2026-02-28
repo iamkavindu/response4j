@@ -41,7 +41,7 @@ public class Response4jExceptionMapper implements ExceptionMapper<Exception> {
     public Response toResponse(Exception exception) {
         ProblemDetail problemDetail = problemDetailMapper.map(exception);
         return Response
-                .status(problemDetail.getStatus())
+                .status(problemDetail.status())
                 .type("application/problem+json")
                 .entity(problemDetail)
                 .build();

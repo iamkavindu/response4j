@@ -49,7 +49,7 @@ public class Response4jExceptionHandler implements ExceptionHandler<Exception, H
 
         return HttpResponse
                 .<ProblemDetail>status(
-                        HttpStatus.valueOf(problemDetail.getStatus())
+                        HttpStatus.valueOf(problemDetail.status())
                 )
                 .contentType("application/problem+json")
                 .body(problemDetail);

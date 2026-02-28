@@ -5,6 +5,7 @@ A framework-agnostic Java library for standardized API error responses aligned w
 ## Features
 
 - **RFC 7807 compliant** — Error responses follow the Problem Details specification
+- **Immutable records** — Core models use Java Records for thread-safe, immutable data structures
 - **Framework-agnostic core** — Use `response4j-core` with any Java web framework
 - **Spring Boot support** — Optional `response4j-spring` module with auto-configuration
 - **Quarkus support** — Optional `response4j-quarkus` module with CDI producers and JAX-RS integration
@@ -222,7 +223,7 @@ ApiResponse<?> noContent = ApiResponse.noContent();
 ApiResponse<Order> custom = ApiResponse.of(200, "Order processed", order);
 
 // Problem details
-ProblemDetail problem = ProblemDetail.of(404, "Not Found", "Resource not found");
+ProblemDetail problem = ProblemDetail.of("Not Found", 404, "Resource not found", null, null);
 ```
 
 ## API Reference
@@ -248,6 +249,8 @@ Factory methods: `of(status, message, data)`, `empty(status, message)`, `ok(data
 | `detail` | `String` | Explanation for this occurrence |
 | `instance` | `String` | Optional instance URI |
 | `extensions` | `Map<String, Object>` | Optional extra fields |
+
+Factory method: `of(title, status, detail, instance, extensions)`.
 
 ### `@SuccessResponse`
 

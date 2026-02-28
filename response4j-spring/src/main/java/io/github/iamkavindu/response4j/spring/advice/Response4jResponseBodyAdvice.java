@@ -9,6 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
@@ -43,7 +44,7 @@ public class Response4jResponseBodyAdvice implements ResponseBodyAdvice<Object> 
      * @return true if advice applies
      */
     @Override
-    public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
+    public boolean supports(MethodParameter returnType, @NonNull Class<? extends HttpMessageConverter<?>> converterType) {
         return returnType.hasMethodAnnotation(SuccessResponse.class)
                 || returnType.getDeclaringClass().isAnnotationPresent(SuccessResponse.class);
     }
@@ -62,10 +63,12 @@ public class Response4jResponseBodyAdvice implements ResponseBodyAdvice<Object> 
      */
     @Nullable
     @Override
-    public Object beforeBodyWrite(@Nullable Object body, MethodParameter returnType, MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
+    public Object beforeBodyWrite(@Nullable Object body, @NonNull MethodParameter returnType, @NonNull MediaType selectedContentType,
+                                  @NonNull Class<? extends HttpMessageConverter<?>> selectedConverterType, @NonNull ServerHttpRequest request,
+                                  @NonNull ServerHttpResponse response) {
 
         if (body instanceof ApiResponse<?> apiResponseBody) {
-            if (apiResponseBody.getStatus() == 204) {
+            if (apiResponseBody.status() == 204) {
                 response.setStatusCode(HttpStatusCode.valueOf(204));
                 return null;
             }
@@ -80,9 +83,9 @@ public class Response4jResponseBodyAdvice implements ResponseBodyAdvice<Object> 
 
         if (apiResponse != null) {
             response.setStatusCode(
-                    HttpStatusCode.valueOf(apiResponse.getStatus())
+                    HttpStatusCode.valueOf(apiResponse.status())
             );
-            if (apiResponse.getStatus() == 204) {
+            if (apiResponse.status() == 204) {
                 return null;
             }
         }

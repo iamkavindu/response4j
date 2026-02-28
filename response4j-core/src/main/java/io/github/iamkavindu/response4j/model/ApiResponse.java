@@ -2,49 +2,134 @@ package io.github.iamkavindu.response4j.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.Builder;
-import lombok.Getter;
-
 import java.time.Instant;
 import java.util.Map;
 
 /**
- * Generic success response wrapper with HTTP status, message, timestamp, and optional data.
+ * Standardized envelope for successful API responses.
  * <p>
- * Null fields are excluded from JSON serialization. The timestamp is formatted in ISO-8601 UTC
- * (e.g. {@code 2024-01-15T10:30:00Z}).
+ * This immutable record provides a consistent structure for wrapping HTTP response data
+ * across different Java web frameworks (Spring Boot, Quarkus, Micronaut). It includes
+ * status code, message, timestamp, and optional payload.
+ * <p>
+ * Instances are typically created via static factory methods ({@link #ok(Object)},
+ * {@link #created(Object)}, {@link #noContent()}) or through the fluent {@link Builder}.
+ * Framework integration modules automatically wrap controller responses when annotated
+ * with {@link io.github.iamkavindu.response4j.annotation.SuccessResponse}.
+ * <p>
+ * This record is thread-safe and immutable. JSON serialization is handled by Jackson
+ * annotations, with null fields excluded from the output.
  *
- * @param <T> the type of the response data
+ * @param <T> the type of the response payload
+ * @param status the HTTP status code (e.g., 200, 201, 204)
+ * @param message human-readable response message describing the result
+ * @param timestamp UTC timestamp in ISO-8601 format (yyyy-MM-dd'T'HH:mm:ss'Z') indicating when the response was created
+ * @param data the response payload of type {@code T}; may be {@code null} or an empty {@link Map} for no-content responses
+ * @see io.github.iamkavindu.response4j.annotation.SuccessResponse
+ * @see Builder
  */
-@Getter
-@Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ApiResponse<T> {
+public record ApiResponse<T>(
+        int status,
+        String message,
+        @JsonFormat(
+                shape = JsonFormat.Shape.STRING,
+                pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'",
+                timezone = "UTC"
+        )
+        Instant timestamp,
+        T data
+) {
+    /**
+     * Builder for constructing {@link ApiResponse} instances using a fluent API.
+     * <p>
+     * This builder allows step-by-step construction of an {@code ApiResponse} with
+     * explicit control over all fields. For common use cases, prefer the static
+     * factory methods ({@link ApiResponse#ok(Object)}, {@link ApiResponse#created(Object)}, etc.)
+     * which provide sensible defaults.
+     *
+     * @param <T> the type of the response payload
+     * @see ApiResponse
+     */
+    public static class Builder<T> {
+        private int status;
+        private String message;
+        private Instant timestamp;
+        private T data;
 
-    /** HTTP status code. */
-    private int status;
+        /**
+         * Sets the HTTP status code.
+         *
+         * @param status the HTTP status code (e.g., 200, 201, 204)
+         * @return this builder for method chaining
+         */
+        public Builder<T> status(int status) {
+            this.status = status;
+            return this;
+        }
 
-    /** Human-readable message describing the result. */
-    private String message;
+        /**
+         * Sets the human-readable response message.
+         *
+         * @param message the message describing the response
+         * @return this builder for method chaining
+         */
+        public Builder<T> message(String message) {
+            this.message = message;
+            return this;
+        }
 
-    /** UTC timestamp of the response in ISO-8601 format. */
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
-    private Instant timestamp;
+        /**
+         * Sets the timestamp for when the response was created.
+         *
+         * @param timestamp the UTC timestamp; if not set, factory methods typically use {@link Instant#now()}
+         * @return this builder for method chaining
+         */
+        public Builder<T> timestamp(Instant timestamp) {
+            this.timestamp = timestamp;
+            return this;
+        }
 
-    /** Optional response payload; may be null. */
-    private T data;
+        /**
+         * Sets the response payload.
+         *
+         * @param data the payload of type {@code T}; may be {@code null} or an empty collection for no-content responses
+         * @return this builder for method chaining
+         */
+        public Builder<T> data(T data) {
+            this.data = data;
+            return this;
+        }
+
+        /**
+         * Constructs an immutable {@link ApiResponse} with the configured values.
+         *
+         * @return a new {@code ApiResponse} instance
+         */
+        public ApiResponse<T> build() {
+            return new ApiResponse<>(status, message, timestamp, data);
+        }
+    }
 
     /**
-     * Creates an API response with the given status, message, and data.
+     * Creates an {@code ApiResponse} with the specified status, message, and data.
+     * <p>
+     * The timestamp is automatically set to the current instant ({@link Instant#now()}).
+     * This is a general-purpose factory method; for common HTTP status codes, prefer
+     * the convenience methods like {@link #ok(Object)}, {@link #created(Object)}, or
+     * {@link #noContent()}.
      *
-     * @param status  the HTTP status code
-     * @param message the human-readable message
-     * @param data    the response payload (may be null)
-     * @param <T>     the type of the data
-     * @return a new {@code ApiResponse} instance
+     * @param <T> the type of the response payload
+     * @param status the HTTP status code (e.g., 200, 201, 204)
+     * @param message the human-readable response message
+     * @param data the response payload; may be {@code null}
+     * @return a new {@code ApiResponse} instance with the current timestamp
+     * @see #ok(Object)
+     * @see #created(Object)
+     * @see #noContent()
      */
     public static <T> ApiResponse<T> of(int status, String message, T data) {
-        return ApiResponse.<T>builder()
+        return new ApiResponse.Builder<T>()
                 .status(status)
                 .message(message)
                 .timestamp(Instant.now())
@@ -53,16 +138,24 @@ public class ApiResponse<T> {
     }
 
     /**
-     * Creates an API response with the given status and message, using an empty map as data.
+     * Creates an {@code ApiResponse} with the specified status and message, using an empty {@link Map} as the data.
+     * <p>
+     * The timestamp is automatically set to the current instant. This method is typically used for
+     * no-content responses (HTTP 204) where a payload is not expected but a consistent structure
+     * is desired. The empty map is used instead of {@code null} to maintain a valid JSON structure.
+     * <p>
+     * The unchecked cast is safe because an empty map is compatible with any generic type {@code T}
+     * at runtime, and the map is immutable.
      *
-     * @param status  the HTTP status code
-     * @param message the human-readable message
-     * @param <T>     the type parameter (data will be an empty map)
-     * @return a new {@code ApiResponse} instance
+     * @param <T> the type of the response payload
+     * @param status the HTTP status code (typically 204)
+     * @param message the human-readable response message
+     * @return a new {@code ApiResponse} instance with an empty map as data
+     * @see #noContent()
      */
     @SuppressWarnings("unchecked")
     public static <T> ApiResponse<T> empty(int status, String message) {
-        return ApiResponse.<T>builder()
+        return new ApiResponse.Builder<T>()
                 .status(status)
                 .message(message)
                 .timestamp(Instant.now())
@@ -71,32 +164,46 @@ public class ApiResponse<T> {
     }
 
     /**
-     * Creates a 200 OK response with the given data.
+     * Creates a successful {@code ApiResponse} with HTTP status 200 OK.
+     * <p>
+     * This is a convenience method that uses the default message "Request successful"
+     * and automatically sets the timestamp to the current instant.
      *
-     * @param data  the response payload (may be null)
-     * @param <T>   the type of the data
-     * @return a new {@code ApiResponse} with status 200 and message "Request successful"
+     * @param <T> the type of the response payload
+     * @param data the response payload
+     * @return a new {@code ApiResponse} with status 200 and default success message
+     * @see #of(int, String, Object)
      */
     public static <T> ApiResponse<T> ok(T data) {
         return of(200, "Request successful", data);
     }
 
     /**
-     * Creates a 201 Created response with the given data.
+     * Creates a successful {@code ApiResponse} with HTTP status 201 Created.
+     * <p>
+     * This is a convenience method for resource creation endpoints. It uses the
+     * default message "Request created successful" and automatically sets the
+     * timestamp to the current instant.
      *
-     * @param data  the response payload (may be null)
-     * @param <T>   the type of the data
-     * @return a new {@code ApiResponse} with status 201 and message "Request created successful"
+     * @param <T> the type of the response payload (typically the created resource)
+     * @param data the response payload, usually the newly created resource
+     * @return a new {@code ApiResponse} with status 201 and default creation message
+     * @see #of(int, String, Object)
      */
     public static <T> ApiResponse<T> created(T data) {
         return of(201, "Request created successful", data);
     }
 
     /**
-     * Creates a 204 No Content response with empty data.
+     * Creates an {@code ApiResponse} with HTTP status 204 No Content.
+     * <p>
+     * This is a convenience method for successful requests that do not return a payload
+     * (e.g., DELETE operations). The data field is set to an empty {@link Map} to maintain
+     * a consistent JSON structure, and the message is "No content".
      *
-     * @param <T> the type parameter (data will be an empty map)
-     * @return a new {@code ApiResponse} with status 204 and message "No content"
+     * @param <T> the type of the response payload (generic to maintain API consistency)
+     * @return a new {@code ApiResponse} with status 204, empty data, and default no-content message
+     * @see #empty(int, String)
      */
     public static <T> ApiResponse<T> noContent() {
         return empty(204, "No content");

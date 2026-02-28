@@ -4,25 +4,39 @@ import io.github.iamkavindu.response4j.annotation.SuccessResponse;
 import io.github.iamkavindu.response4j.model.ApiResponse;
 
 /**
- * Maps controller return values to {@link ApiResponse}, using {@link SuccessResponse} when present.
+ * Maps controller response data to {@link ApiResponse} instances based on {@link SuccessResponse} annotations.
  * <p>
- * When the annotation specifies {@code wrap=false}, returns {@code null} (caller should pass through
- * the original body). When annotation is null, defaults to 200 OK with the provided data.
+ * This mapper handles the transformation of raw controller return values into standardized
+ * {@code ApiResponse} wrappers. It respects the {@code wrap} attribute of the annotation and
+ * provides sensible defaults when no annotation is present.
+ * <p>
+ * Used by framework integration modules (Spring, Quarkus, Micronaut) to automatically wrap
+ * controller responses in consistent API response structures.
+ *
+ * @see ApiResponse
+ * @see SuccessResponse
  */
 public class ApiResponseMapper {
 
     /**
-     * Maps the given data to an {@code ApiResponse}.
+     * Maps the given data to an {@code ApiResponse} based on the provided annotation.
      * <p>
-     * If {@code annotation} is non-null, its {@code status}, {@code message}, and {@code wrap}
-     * values are used. If {@code wrap} is false, returns {@code null}. If {@code annotation} is
-     * null, defaults to {@link ApiResponse#ok(Object)} for non-null data or
-     * {@link ApiResponse#noContent()} for null.
+     * When an annotation is present, uses its status, message, and wrap settings. When
+     * {@code wrap=false}, returns {@code null} to signal that the original data should be
+     * returned unwrapped. For {@code null} data or status 204, creates an empty response.
+     * <p>
+     * When no annotation is present, applies default behavior: {@code null} data produces
+     * a 204 No Content response, and non-null data produces a 200 OK response.
      *
-     * @param data       the controller return value (may be null)
-     * @param annotation the {@code @SuccessResponse} metadata, or null for defaults
-     * @param <T>        the type of the data
-     * @return the mapped {@code ApiResponse}, or null when wrap is false
+     * @param <T> the type of the response data
+     * @param data the controller return value to wrap; may be {@code null}
+     * @param annotation the {@code @SuccessResponse} annotation from the controller method or class;
+     *                   may be {@code null} to use defaults
+     * @return an {@code ApiResponse} wrapping the data, or {@code null} if {@code wrap=false}
+     * @see ApiResponse#of(int, String, Object)
+     * @see ApiResponse#empty(int, String)
+     * @see ApiResponse#ok(Object)
+     * @see ApiResponse#noContent()
      */
     public <T> ApiResponse<?> map(T data, SuccessResponse annotation) {
         if (annotation != null) {

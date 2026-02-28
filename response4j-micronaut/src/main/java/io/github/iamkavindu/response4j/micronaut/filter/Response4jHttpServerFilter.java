@@ -68,7 +68,7 @@ public class Response4jHttpServerFilter implements HttpServerFilter {
 
         if (apiResponse != null) {
             return ((MutableHttpResponse<Object>) response)
-                    .status(apiResponse.getStatus())
+                    .status(apiResponse.status())
                     .body(apiResponse);
         }
         return response;

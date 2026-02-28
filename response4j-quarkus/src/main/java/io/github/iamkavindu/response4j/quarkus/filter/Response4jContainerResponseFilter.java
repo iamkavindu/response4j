@@ -69,7 +69,7 @@ public class Response4jContainerResponseFilter implements ContainerResponseFilte
         ApiResponse<?> apiResponse = apiResponseMapper.map(body, annotation);
 
         if (apiResponse != null) {
-            responseContext.setStatus(apiResponse.getStatus());
+            responseContext.setStatus(apiResponse.status());
             responseContext.setEntity(apiResponse);
         }
     }

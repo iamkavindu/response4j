@@ -37,7 +37,7 @@ public class Response4jExceptionHandler {
     public ResponseEntity<ProblemDetail> handleException(Exception exception) {
         ProblemDetail problemDetail = problemDetailMapper.map(exception);
         return ResponseEntity
-                .status(problemDetail.getStatus())
+                .status(problemDetail.status())
                 .contentType(MediaType.APPLICATION_PROBLEM_JSON)
                 .body(problemDetail);
     }

@@ -45,7 +45,7 @@ public class ProblemDetailMapper {
                 ? Objects.requireNonNullElse(exception.getMessage(), "")
                 : annotation.detail();
 
-        return ProblemDetail.builder()
+        return new ProblemDetail.Builder()
                 .type(URI.create(annotation.type()))
                 .status(annotation.status())
                 .title(title)
@@ -54,7 +54,7 @@ public class ProblemDetailMapper {
     }
 
     private ProblemDetail mapWithDefaults(Throwable exception) {
-        return ProblemDetail.builder()
+        return new ProblemDetail.Builder()
                 .type(URI.create("about:blank"))
                 .status(500)
                 .title("Internal Server Error")
