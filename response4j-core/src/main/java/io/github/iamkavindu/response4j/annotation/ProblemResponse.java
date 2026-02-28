@@ -7,12 +7,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Marks an exception class for RFC 7807 Problem Details mapping.
+ * Marks an exception class for RFC 9457 Problem Details mapping.
  * <p>
  * When an annotated exception is thrown, it is mapped to a {@link io.github.iamkavindu.response4j.model.ProblemDetail}
  * using the values specified here. Blank values fall back to defaults (e.g. exception class name for title).
  *
  * @see io.github.iamkavindu.response4j.model.ProblemDetail
+ * @see <a href="https://www.rfc-editor.org/rfc/rfc9457">RFC 9457: Problem Details for HTTP APIs</a>
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
@@ -33,9 +34,13 @@ public @interface ProblemResponse {
     String title() default "";
 
     /**
-     * URI reference identifying the problem type (RFC 7807).
+     * URI reference identifying the problem type (RFC 9457).
+     * <p>
+     * Per RFC 9457 Section 4.2.1, when this is {@code "about:blank"}, the title MUST be
+     * the HTTP reason phrase for the status code (e.g., "Not Found" for 404).
      *
      * @return the type URI
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc9457#section-4.2.1">RFC 9457 Section 4.2.1</a>
      */
     String type() default "about:blank";
 

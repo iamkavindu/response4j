@@ -8,7 +8,7 @@
     <packaging>pom</packaging>
 
     <name>response4j</name>
-    <description>A framework-agnostic Java library for standardized API error responses aligned with RFC 7807 Problem Details</description>
+    <description>A framework-agnostic Java library for standardized API error responses aligned with RFC 9457 Problem Details for HTTP APIs</description>
     <url>https://github.com/iamkavindu/response4j</url>
 
     <licenses>

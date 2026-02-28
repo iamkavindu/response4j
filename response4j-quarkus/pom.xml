@@ -13,7 +13,7 @@
     <name>response4j-quarkus</name>
 
     <properties>
-        <quarkus.version>3.32.1</quarkus.version>
+        <quarkus.version>3.22.3</quarkus.version>
     </properties>
 
     <dependencyManagement>
@@ -36,7 +36,7 @@
 
         <dependency>
             <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-resteasy-reactive</artifactId>
+            <artifactId>quarkus-rest</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>

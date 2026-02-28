@@ -3,7 +3,7 @@ package io.github.iamkavindu.response4j.micronaut.filter;
 import io.github.iamkavindu.response4j.annotation.SuccessResponse;
 import io.github.iamkavindu.response4j.mapper.ApiResponseMapper;
 import io.github.iamkavindu.response4j.model.ApiResponse;
-import io.micronaut.http.HttpAttributes;
+import io.micronaut.http.BasicHttpAttributes;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.MutableHttpResponse;
 import io.micronaut.http.annotation.Filter;
@@ -55,7 +55,7 @@ public class Response4jHttpServerFilter implements HttpServerFilter {
 
         if (response.getBody().orElse(null) instanceof ApiResponse<?>) {return response;}
 
-        RouteMatch<?> routeMatch = request.getAttribute(HttpAttributes.ROUTE_MATCH, RouteMatch.class)
+        RouteMatch<?> routeMatch = (RouteMatch<?>) BasicHttpAttributes.getRouteMatchInfo(request)
                 .orElse(null);
 
         if (routeMatch == null) {return response;}

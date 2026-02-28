@@ -13,10 +13,13 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
 /**
- * Micronaut exception handler that produces RFC 7807 {@link ProblemDetail} responses for all exceptions.
+ * Micronaut exception handler that produces RFC 9457 {@link ProblemDetail} responses for all exceptions.
  * <p>
  * Returns responses with {@code Content-Type: application/problem+json} and the appropriate
  * HTTP status from the mapped problem detail (or 500 for unmapped exceptions).
+ * <p>
+ * Per RFC 9457 Section 3.1, the {@code instance} field is populated with the request URI to help
+ * identify the specific occurrence of the problem.
  */
 @Singleton
 @Produces(MediaType.APPLICATION_JSON)
@@ -38,6 +41,9 @@ public class Response4jExceptionHandler implements ExceptionHandler<Exception, H
     /**
      * Handles the exception, mapping it to ProblemDetail and returning as
      * {@code application/problem+json}.
+     * <p>
+     * The request URI is passed to the mapper to populate the {@code instance} field,
+     * which identifies the specific occurrence of the problem per RFC 9457.
      *
      * @param request   the HTTP request
      * @param exception the thrown exception
@@ -45,7 +51,8 @@ public class Response4jExceptionHandler implements ExceptionHandler<Exception, H
      */
     @Override
     public HttpResponse<ProblemDetail> handle(HttpRequest request, Exception exception) {
-        ProblemDetail problemDetail = problemDetailMapper.map(exception);
+        String instance = request.getUri().getPath();
+        ProblemDetail problemDetail = problemDetailMapper.map(exception, instance);
 
         return HttpResponse
                 .<ProblemDetail>status(
