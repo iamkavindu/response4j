@@ -6,11 +6,27 @@
     <parent>
         <groupId>io.github.iamkavindu</groupId>
         <artifactId>response4j</artifactId>
-        <version>0.1.0-SNAPSHOT</version>
+        <version>0.1.0</version>
     </parent>
 
     <artifactId>response4j-micronaut</artifactId>
     <name>response4j-micronaut</name>
+
+    <properties>
+        <micronaut.version>4.10.8</micronaut.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.micronaut.platform</groupId>
+                <artifactId>micronaut-platform</artifactId>
+                <version>${micronaut.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -21,19 +37,16 @@
         <dependency>
             <groupId>io.micronaut</groupId>
             <artifactId>micronaut-http</artifactId>
-            <version>4.3.5</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>io.micronaut</groupId>
             <artifactId>micronaut-http-server</artifactId>
-            <version>4.3.5</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>io.micronaut</groupId>
             <artifactId>micronaut-inject</artifactId>
-            <version>4.3.5</version>
             <scope>provided</scope>
         </dependency>
 

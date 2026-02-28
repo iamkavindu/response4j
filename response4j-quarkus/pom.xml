@@ -6,11 +6,27 @@
     <parent>
         <groupId>io.github.iamkavindu</groupId>
         <artifactId>response4j</artifactId>
-        <version>0.1.0-SNAPSHOT</version>
+        <version>0.1.0</version>
     </parent>
 
     <artifactId>response4j-quarkus</artifactId>
     <name>response4j-quarkus</name>
+
+    <properties>
+        <quarkus.version>3.32.1</quarkus.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.quarkus.platform</groupId>
+                <artifactId>quarkus-bom</artifactId>
+                <version>${quarkus.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -21,13 +37,11 @@
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-resteasy-reactive</artifactId>
-            <version>3.8.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-arc</artifactId>
-            <version>3.8.1</version>
             <scope>provided</scope>
         </dependency>
 

@@ -19,6 +19,12 @@ A framework-agnostic Java library for standardized API error responses aligned w
 - **Java 21+**
 - **Maven 3.6+**
 
+## Compatibility
+
+| response4j | Java | Spring Boot | Quarkus | Micronaut |
+|------------|------|-------------|---------|-----------|
+| 0.1.0      | 21+  | 3.5.x       | 3.32.x  | 4.10.x    |
+
 ## Modules
 
 | Module | Description |
