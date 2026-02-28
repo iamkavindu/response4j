@@ -23,16 +23,16 @@ A framework-agnostic Java library for standardized API error responses aligned w
 
 | response4j | Java | Spring Boot | Quarkus | Micronaut |
 |------------|------|-------------|---------|-----------|
-| 0.1.0      | 21+  | 3.5.x       | 3.32.x  | 4.10.x    |
+| 0.1.0      | 21+  | 3.5.x       | 3.22.x  | 4.10.x    |
 
 ## Modules
 
-| Module | Description |
-|--------|-------------|
-| `response4j-core` | Core models (`ApiResponse`, `ProblemDetail`), annotations, and mappers. No framework dependencies. |
-| `response4j-spring` | Spring Boot auto-configuration: exception handler, response body advice. Depends on Spring Web MVC and Boot. |
-| `response4j-quarkus` | Quarkus integration: CDI producers for mappers, JAX-RS exception mapper, container response filter. Depends on Quarkus REST (RESTEasy Reactive) and Arc. |
-| `response4j-micronaut` | Micronaut integration: bean factory for mappers, HTTP server filter, exception handler. Depends on Micronaut HTTP, server, and inject. |
+| Module                 | Description                                                                                                                                              |
+|------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `response4j-core`      | Core models (`ApiResponse`, `ProblemDetail`), annotations, and mappers. No framework dependencies.                                                       |
+| `response4j-spring`    | Spring Boot auto-configuration: exception handler, response body advice. Depends on Spring Web MVC and Boot.                                             |
+| `response4j-quarkus`   | Quarkus integration: CDI producers for mappers, JAX-RS exception mapper, container response filter. Depends on Quarkus REST (RESTEasy Reactive) and Arc. |
+| `response4j-micronaut` | Micronaut integration: bean factory for mappers, HTTP server filter, exception handler. Depends on Micronaut HTTP, server, and inject.                   |
 
 ## Installation
 
@@ -46,7 +46,7 @@ Add the dependency for your use case.
 <dependency>
     <groupId>io.github.iamkavindu</groupId>
     <artifactId>response4j-core</artifactId>
-    <version>0.2.0-SNAPSHOT</version>
+    <version>0.1.0</version>
 </dependency>
 ```
 
@@ -56,7 +56,7 @@ Add the dependency for your use case.
 <dependency>
     <groupId>io.github.iamkavindu</groupId>
     <artifactId>response4j-spring</artifactId>
-    <version>0.2.0-SNAPSHOT</version>
+    <version>0.1.0</version>
 </dependency>
 ```
 
@@ -66,7 +66,7 @@ Add the dependency for your use case.
 <dependency>
     <groupId>io.github.iamkavindu</groupId>
     <artifactId>response4j-quarkus</artifactId>
-    <version>0.2.0-SNAPSHOT</version>
+    <version>0.1.0</version>
 </dependency>
 ```
 
@@ -76,7 +76,7 @@ Add the dependency for your use case.
 <dependency>
     <groupId>io.github.iamkavindu</groupId>
     <artifactId>response4j-micronaut</artifactId>
-    <version>0.2.0-SNAPSHOT</version>
+    <version>0.1.0</version>
 </dependency>
 ```
 
@@ -167,11 +167,40 @@ Unhandled exceptions produce `Content-Type: application/problem+json` with statu
 }
 ```
 
+#### Problem extensions
+
+Add custom fields to problem details using `@ProblemExtension`. This annotation is repeatable, allowing multiple extensions on the same exception class:
+
+```java
+@ProblemResponse(status = 400, title = "Validation Error",
+    type = "https://api.example.com/errors/validation")
+@ProblemExtension(key = "docs", value = "https://api.example.com/docs/validation")
+@ProblemExtension(key = "supportEmail", value = "support@example.com")
+public class ValidationException extends RuntimeException {
+    public ValidationException(String message) {
+        super(message);
+    }
+}
+```
+
+Extension fields appear as top-level properties in the JSON response:
+
+```json
+{
+  "type": "https://api.example.com/errors/validation",
+  "title": "Validation Error",
+  "status": 400,
+  "detail": "Invalid email format",
+  "docs": "https://api.example.com/docs/validation",
+  "supportEmail": "support@example.com"
+}
+```
+
 ### Quarkus
 
 With `response4j-quarkus` on the classpath, CDI beans (`ApiResponseMapper`, `ProblemDetailMapper`) are auto-produced. A JAX-RS `ExceptionMapper` and `ContainerResponseFilter` handle exception mapping and `@SuccessResponse` wrapping respectively.
 
-Annotate resource methods or classes with `@SuccessResponse` and exception classes with `@ProblemResponse` the same way as with Spring Boot:
+Annotate resource methods or classes with `@SuccessResponse` and exception classes with `@ProblemResponse` (with optional `@ProblemExtension`) the same way as with Spring Boot:
 
 ```java
 @Path("/users")
@@ -196,7 +225,7 @@ public class UserResource {
 
 With `response4j-micronaut` on the classpath, a bean factory auto-registers `ApiResponseMapper` and `ProblemDetailMapper` when Micronaut HTTP is present. `Response4jHttpServerFilter` applies `@SuccessResponse` wrapping to controller responses, and `Response4jExceptionHandler` maps exceptions to RFC 9457 Problem Details.
 
-Annotate controller methods or classes with `@SuccessResponse` and exception classes with `@ProblemResponse` the same way as with Spring Boot or Quarkus:
+Annotate controller methods or classes with `@SuccessResponse` and exception classes with `@ProblemResponse` (with optional `@ProblemExtension`) the same way as with Spring Boot or Quarkus:
 
 ```java
 @Controller("/users")
@@ -216,6 +245,55 @@ public class UserController {
 }
 ```
 
+### Validation Errors
+
+For validation scenarios with multiple field-level errors, use `ProblemDetailError` to represent individual field errors and `ProblemDetail.ofErrors()` to create a problem response containing them:
+
+```java
+import io.github.iamkavindu.response4j.model.ProblemDetail;
+import io.github.iamkavindu.response4j.model.ProblemDetailError;
+
+List<ProblemDetailError> errors = List.of(
+    new ProblemDetailError("/email", "must be a valid email address"),
+    new ProblemDetailError("/age", "must be at least 18"),
+    new ProblemDetailError("username", "is already taken")
+);
+
+ProblemDetail problem = ProblemDetail.ofErrors(
+    "Validation Failed",
+    400,
+    "The request contains invalid fields",
+    errors
+);
+```
+
+The resulting JSON response includes an `errors` array as an extension field:
+
+```json
+{
+  "type": "about:blank",
+  "title": "Validation Failed",
+  "status": 400,
+  "detail": "The request contains invalid fields",
+  "errors": [
+    {
+      "pointer": "/email",
+      "detail": "must be a valid email address"
+    },
+    {
+      "pointer": "/age",
+      "detail": "must be at least 18"
+    },
+    {
+      "pointer": "username",
+      "detail": "is already taken"
+    }
+  ]
+}
+```
+
+The `pointer` field can be a JSON Pointer (RFC 6901) like `/email` or `/user/profile/age`, or a simple field name like `username`.
+
 ### Core (framework-agnostic)
 
 Use `response4j-core` without Spring for manual mapping and serialization:
@@ -231,6 +309,26 @@ ApiResponse<Order> custom = ApiResponse.of(200, "Order processed", order);
 
 // Problem details
 ProblemDetail problem = ProblemDetail.of("Not Found", 404, "Resource not found", null, null);
+
+// Using ProblemTypes constants
+ProblemDetail.Builder builder = new ProblemDetail.Builder()
+    .type(ProblemTypes.ABOUT_BLANK)
+    .title("Not Found")
+    .status(404)
+    .detail("Resource not found")
+    .build();
+
+// Validation errors
+List<ProblemDetailError> errors = List.of(
+    new ProblemDetailError("/email", "must be a valid email address"),
+    new ProblemDetailError("/age", "must be at least 18")
+);
+ProblemDetail validation = ProblemDetail.ofErrors(
+    "Validation Failed",
+    400,
+    "The request contains invalid fields",
+    errors
+);
 ```
 
 ## API Reference
@@ -257,7 +355,25 @@ Factory methods: `of(status, message, data)`, `empty(status, message)`, `ok(data
 | `instance`   | `String`              | Optional instance URI           |
 | `extensions` | `Map<String, Object>` | Optional extra fields           |
 
-Factory method: `of(title, status, detail, instance, extensions)`.
+Factory methods: `of(title, status, detail, instance, extensions)`, `ofErrors(title, status, detail, errors)`.
+
+### `ProblemDetailError`
+
+| Field     | Type     | Description                                             |
+|-----------|----------|---------------------------------------------------------|
+| `pointer` | `String` | JSON Pointer (RFC 6901) or field name identifying error source |
+| `detail`  | `String` | Human-readable explanation of this specific error      |
+
+Used in `ProblemDetail.extensions` under the `"errors"` key for multi-problem responses (validation scenarios).
+
+### `ProblemTypes`
+
+Utility class providing constants for well-known problem type URIs:
+
+| Constant      | Value                                                   | Description                                        |
+|---------------|---------------------------------------------------------|----------------------------------------------------|
+| `ABOUT_BLANK` | `URI.create("about:blank")`                             | Indicates no specific problem type documentation   |
+| `IANA_BASE`   | `"https://iana.org/assignments/http-problem-types#"`    | Base URI for IANA-registered problem types         |
 
 ### `@SuccessResponse`
 
@@ -276,6 +392,15 @@ Factory method: `of(title, status, detail, instance, extensions)`.
 | `type`                    | `"about:blank"`                           | Problem type URI (RFC 9457 Section 4.2.1: when `about:blank`, title must be HTTP reason phrase) |
 | `detail`                  | `""`                                      | Detail text                                                                                     |
 | `includeExceptionMessage` | `true`                                    | Use exception message as detail when `detail` is blank                                          |
+
+### `@ProblemExtension`
+
+| Attribute | Description                                              |
+|-----------|----------------------------------------------------------|
+| `key`     | Extension field name (appears as top-level JSON property) |
+| `value`   | Extension field value (serialized as string)             |
+
+**Repeatable:** Apply multiple times on the same exception class. The `@ProblemExtensions` container annotation is auto-applied by the compiler.
 
 ## Project Structure
 
