@@ -1,11 +1,11 @@
 ![response4j flow](./docs/response4j-flow.svg)
 # response4j
 
-A framework-agnostic Java library for standardized API error responses aligned with [RFC 7807 Problem Details for HTTP APIs](https://www.rfc-editor.org/rfc/rfc7807).
+A framework-agnostic Java library for standardized API error responses aligned with [RFC 9457 Problem Details for HTTP APIs](https://www.rfc-editor.org/rfc/rfc9457).
 
 ## Features
 
-- **RFC 7807 compliant** — Error responses follow the Problem Details specification
+- **RFC 9457 compliant** — Error responses follow the Problem Details specification
 - **Immutable records** — Core models use Java Records for thread-safe, immutable data structures
 - **Framework-agnostic core** — Use `response4j-core` with any Java web framework
 - **Spring Boot support** — Optional `response4j-spring` module with auto-configuration
@@ -46,7 +46,7 @@ Add the dependency for your use case.
 <dependency>
     <groupId>io.github.iamkavindu</groupId>
     <artifactId>response4j-core</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.2.0-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -56,7 +56,7 @@ Add the dependency for your use case.
 <dependency>
     <groupId>io.github.iamkavindu</groupId>
     <artifactId>response4j-spring</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.2.0-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -66,7 +66,7 @@ Add the dependency for your use case.
 <dependency>
     <groupId>io.github.iamkavindu</groupId>
     <artifactId>response4j-quarkus</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.2.0-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -76,7 +76,7 @@ Add the dependency for your use case.
 <dependency>
     <groupId>io.github.iamkavindu</groupId>
     <artifactId>response4j-micronaut</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.2.0-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -138,7 +138,7 @@ Example success response:
 
 #### Error responses
 
-Annotate exception classes with `@ProblemResponse` to control how they are mapped to RFC 7807 Problem Details:
+Annotate exception classes with `@ProblemResponse` to control how they are mapped to RFC 9457 Problem Details:
 
 ```java
 @ProblemResponse(status = 404, title = "User Not Found")
@@ -194,7 +194,7 @@ public class UserResource {
 
 ### Micronaut
 
-With `response4j-micronaut` on the classpath, a bean factory auto-registers `ApiResponseMapper` and `ProblemDetailMapper` when Micronaut HTTP is present. `Response4jHttpServerFilter` applies `@SuccessResponse` wrapping to controller responses, and `Response4jExceptionHandler` maps exceptions to RFC 7807 Problem Details.
+With `response4j-micronaut` on the classpath, a bean factory auto-registers `ApiResponseMapper` and `ProblemDetailMapper` when Micronaut HTTP is present. `Response4jHttpServerFilter` applies `@SuccessResponse` wrapping to controller responses, and `Response4jExceptionHandler` maps exceptions to RFC 9457 Problem Details.
 
 Annotate controller methods or classes with `@SuccessResponse` and exception classes with `@ProblemResponse` the same way as with Spring Boot or Quarkus:
 
@@ -237,45 +237,45 @@ ProblemDetail problem = ProblemDetail.of("Not Found", 404, "Resource not found",
 
 ### `ApiResponse<T>`
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `status` | `int` | HTTP status code |
-| `message` | `String` | Human-readable message |
+| Field       | Type      | Description              |
+|-------------|-----------|--------------------------|
+| `status`    | `int`     | HTTP status code         |
+| `message`   | `String`  | Human-readable message   |
 | `timestamp` | `Instant` | UTC timestamp (ISO-8601) |
-| `data` | `T` | Optional payload |
+| `data`      | `T`       | Optional payload         |
 
 Factory methods: `of(status, message, data)`, `empty(status, message)`, `ok(data)`, `created(data)`, `noContent()`.
 
 ### `ProblemDetail`
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `type` | `URI` | Problem type (RFC 7807) |
-| `title` | `String` | Short summary |
-| `status` | `int` | HTTP status |
-| `detail` | `String` | Explanation for this occurrence |
-| `instance` | `String` | Optional instance URI |
-| `extensions` | `Map<String, Object>` | Optional extra fields |
+| Field        | Type                  | Description                     |
+|--------------|-----------------------|---------------------------------|
+| `type`       | `URI`                 | Problem type (RFC 9457)         |
+| `title`      | `String`              | Short summary                   |
+| `status`     | `int`                 | HTTP status                     |
+| `detail`     | `String`              | Explanation for this occurrence |
+| `instance`   | `String`              | Optional instance URI           |
+| `extensions` | `Map<String, Object>` | Optional extra fields           |
 
 Factory method: `of(title, status, detail, instance, extensions)`.
 
 ### `@SuccessResponse`
 
-| Attribute | Default | Description |
-|-----------|---------|-------------|
-| `status` | `200` | HTTP status code |
-| `message` | `"Request successful"` | Message in the response |
-| `wrap` | `true` | Wrap in `ApiResponse`; if `false`, return body as-is |
+| Attribute | Default                | Description                                          |
+|-----------|------------------------|------------------------------------------------------|
+| `status`  | `200`                  | HTTP status code                                     |
+| `message` | `"Request successful"` | Message in the response                              |
+| `wrap`    | `true`                 | Wrap in `ApiResponse`; if `false`, return body as-is |
 
 ### `@ProblemResponse`
 
-| Attribute | Default | Description |
-|-----------|---------|-------------|
-| `status` | `500` | HTTP status code |
-| `title` | `""` (falls back to exception class name) | Short summary |
-| `type` | `"about:blank"` | Problem type URI |
-| `detail` | `""` | Detail text |
-| `includeExceptionMessage` | `true` | Use exception message as detail when `detail` is blank |
+| Attribute                 | Default                                   | Description                                                                                     |
+|---------------------------|-------------------------------------------|-------------------------------------------------------------------------------------------------|
+| `status`                  | `500`                                     | HTTP status code                                                                                |
+| `title`                   | `""` (falls back to exception class name) | Short summary                                                                                   |
+| `type`                    | `"about:blank"`                           | Problem type URI (RFC 9457 Section 4.2.1: when `about:blank`, title must be HTTP reason phrase) |
+| `detail`                  | `""`                                      | Detail text                                                                                     |
+| `includeExceptionMessage` | `true`                                    | Use exception message as detail when `detail` is blank                                          |
 
 ## Project Structure
 
