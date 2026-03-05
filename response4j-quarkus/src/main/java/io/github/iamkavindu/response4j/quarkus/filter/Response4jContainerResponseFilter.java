@@ -11,7 +11,6 @@ import jakarta.ws.rs.container.ContainerResponseFilter;
 import jakarta.ws.rs.container.ResourceInfo;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.ext.Provider;
-
 import java.io.IOException;
 import java.lang.reflect.Method;
 
@@ -47,10 +46,9 @@ public class Response4jContainerResponseFilter implements ContainerResponseFilte
      *
      * @param requestContext  the request context
      * @param responseContext the response context (may be modified)
-     * @throws IOException if an I/O error occurs during filtering
      */
     @Override
-    public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) throws IOException {
+    public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) {
 
         Method resourceMethod = resourceInfo.getResourceMethod();
         if (resourceMethod == null) return;
@@ -59,8 +57,7 @@ public class Response4jContainerResponseFilter implements ContainerResponseFilte
 
         SuccessResponse annotation = resourceMethod.getAnnotation(SuccessResponse.class);
         if (annotation == null) {
-            annotation = resourceInfo.getResourceClass()
-                    .getAnnotation(SuccessResponse.class);
+            annotation = resourceInfo.getResourceClass().getAnnotation(SuccessResponse.class);
         }
 
         if (annotation == null) return;

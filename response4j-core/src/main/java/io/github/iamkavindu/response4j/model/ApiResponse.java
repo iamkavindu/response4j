@@ -32,14 +32,11 @@ import java.util.Map;
 public record ApiResponse<T>(
         int status,
         String message,
-        @JsonFormat(
-                shape = JsonFormat.Shape.STRING,
-                pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'",
-                timezone = "UTC"
-        )
+
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
         Instant timestamp,
-        T data
-) {
+
+        T data) {
     /**
      * Builder for constructing {@link ApiResponse} instances using a fluent API.
      * <p>

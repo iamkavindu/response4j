@@ -46,22 +46,27 @@ public class Response4jHttpServerFilter implements HttpServerFilter {
      */
     @Override
     public Publisher<MutableHttpResponse<?>> doFilter(HttpRequest<?> request, ServerFilterChain chain) {
-        return Flux.from(chain.proceed(request))
-                .map(response -> wrapIfRequired(request, response));
+        return Flux.from(chain.proceed(request)).map(response -> wrapIfRequired(request, response));
     }
 
     @SuppressWarnings("unchecked")
     private MutableHttpResponse<?> wrapIfRequired(HttpRequest<?> request, MutableHttpResponse<?> response) {
 
-        if (response.getBody().orElse(null) instanceof ApiResponse<?>) {return response;}
+        if (response.getBody().orElse(null) instanceof ApiResponse<?>) {
+            return response;
+        }
 
-        RouteMatch<?> routeMatch = (RouteMatch<?>) BasicHttpAttributes.getRouteMatchInfo(request)
-                .orElse(null);
+        RouteMatch<?> routeMatch =
+                (RouteMatch<?>) BasicHttpAttributes.getRouteMatchInfo(request).orElse(null);
 
-        if (routeMatch == null) {return response;}
+        if (routeMatch == null) {
+            return response;
+        }
 
         SuccessResponse annotation = resolveAnnotation(routeMatch);
-        if (annotation == null) {return response;}
+        if (annotation == null) {
+            return response;
+        }
 
         Object body = response.getBody().orElse(null);
         ApiResponse<?> apiResponse = apiResponseMapper.map(body, annotation);

@@ -14,21 +14,14 @@ public class TestErrorController {
             title = "Bad Request",
             type = "https://api.example.com/problems/bad-request",
             detail = "Request is invalid",
-            includeExceptionMessage = false
-    )
+            includeExceptionMessage = false)
     static class AnnotatedBadRequestException extends RuntimeException {
         AnnotatedBadRequestException() {
             super("ignored");
         }
     }
 
-    @ProblemResponse(
-            status = 404,
-            title = "",
-            type = "about:blank",
-            detail = "",
-            includeExceptionMessage = false
-    )
+    @ProblemResponse(status = 404, title = "", type = "about:blank", detail = "", includeExceptionMessage = false)
     static class AboutBlankNotFoundException extends RuntimeException {
         AboutBlankNotFoundException() {
             super("ignored");
@@ -56,4 +49,3 @@ public class TestErrorController {
         throw new UnannotatedException("failure");
     }
 }
-

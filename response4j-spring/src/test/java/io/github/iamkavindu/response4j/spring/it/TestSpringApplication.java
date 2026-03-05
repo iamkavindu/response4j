@@ -7,6 +7,4 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * response4j Spring auto-configuration, advice, and exception handler.
  */
 @SpringBootApplication
-public class TestSpringApplication {
-}
-
+public class TestSpringApplication {}

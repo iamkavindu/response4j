@@ -44,7 +44,8 @@ public class Response4jResponseBodyAdvice implements ResponseBodyAdvice<Object> 
      * @return true if advice applies
      */
     @Override
-    public boolean supports(MethodParameter returnType, @NonNull Class<? extends HttpMessageConverter<?>> converterType) {
+    public boolean supports(
+            MethodParameter returnType, @NonNull Class<? extends HttpMessageConverter<?>> converterType) {
         return returnType.hasMethodAnnotation(SuccessResponse.class)
                 || returnType.getDeclaringClass().isAnnotationPresent(SuccessResponse.class);
     }
@@ -61,11 +62,14 @@ public class Response4jResponseBodyAdvice implements ResponseBodyAdvice<Object> 
      * @param response                  the current response
      * @return the body to write (possibly wrapped), or null for 204 No Content
      */
-    @Nullable
-    @Override
-    public Object beforeBodyWrite(@Nullable Object body, @NonNull MethodParameter returnType, @NonNull MediaType selectedContentType,
-                                  @NonNull Class<? extends HttpMessageConverter<?>> selectedConverterType, @NonNull ServerHttpRequest request,
-                                  @NonNull ServerHttpResponse response) {
+    @Nullable @Override
+    public Object beforeBodyWrite(
+            @Nullable Object body,
+            @NonNull MethodParameter returnType,
+            @NonNull MediaType selectedContentType,
+            @NonNull Class<? extends HttpMessageConverter<?>> selectedConverterType,
+            @NonNull ServerHttpRequest request,
+            @NonNull ServerHttpResponse response) {
 
         if (body instanceof ApiResponse<?> apiResponseBody) {
             if (apiResponseBody.status() == 204) {
@@ -82,9 +86,7 @@ public class Response4jResponseBodyAdvice implements ResponseBodyAdvice<Object> 
         ApiResponse<?> apiResponse = apiResponseMapper.map(body, annotation);
 
         if (apiResponse != null) {
-            response.setStatusCode(
-                    HttpStatusCode.valueOf(apiResponse.status())
-            );
+            response.setStatusCode(HttpStatusCode.valueOf(apiResponse.status()));
             if (apiResponse.status() == 204) {
                 return null;
             }

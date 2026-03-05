@@ -33,5 +33,4 @@ package io.github.iamkavindu.response4j.model;
  * @see <a href="https://www.rfc-editor.org/rfc/rfc9457#section-3">RFC 9457 Section 3</a>
  * @see <a href="https://www.rfc-editor.org/rfc/rfc6901">RFC 6901: JSON Pointer</a>
  */
-public record ProblemDetailError(String pointer, String detail) {
-}
+public record ProblemDetailError(String pointer, String detail) {}

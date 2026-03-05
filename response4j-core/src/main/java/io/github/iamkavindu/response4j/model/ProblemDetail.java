@@ -2,7 +2,6 @@ package io.github.iamkavindu.response4j.model;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
-
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
@@ -54,8 +53,7 @@ public record ProblemDetail(
         int status,
         String detail,
         String instance,
-        @JsonAnyGetter Map<String, Object> extensions
-) {
+        @JsonAnyGetter Map<String, Object> extensions) {
     /**
      * Builder for constructing RFC 9457-compliant {@link ProblemDetail} instances using a fluent API.
      * <p>
@@ -195,7 +193,8 @@ public record ProblemDetail(
      * @see Builder
      * @see <a href="https://www.rfc-editor.org/rfc/rfc9457">RFC 9457: Problem Details for HTTP APIs</a>
      */
-    public static ProblemDetail of(String title, int status, String detail, String instance, Map<String, Object> extensions) {
+    public static ProblemDetail of(
+            String title, int status, String detail, String instance, Map<String, Object> extensions) {
         return new ProblemDetail.Builder()
                 .type(ProblemTypes.ABOUT_BLANK)
                 .title(title)
