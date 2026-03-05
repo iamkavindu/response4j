@@ -481,7 +481,7 @@ response4j/
 │       └── filter/           # Response4jContainerResponseFilter
 ├── response4j-micronaut/     # Micronaut integration
 │   └── src/main/java/.../
-│       ├── factory/          # ResponseFactory (beans)
+│       ├── factory/          # Response4jFactory (beans)
 │       ├── filter/           # Response4jHttpServerFilter
 │       └── handler/          # Response4jExceptionHandler
 └── pom.xml
@@ -496,5 +496,10 @@ response4j/
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Run `mvn clean verify`
-5. Submit a pull request
+4. Format code with Spotless before building:
+   ```bash
+   mvn spotless:apply
+   ```
+   This project enforces [Palantir Java Format](https://github.com/palantir/palantir-java-format) via the [Spotless Maven plugin](https://github.com/diffplug/spotless). The `spotless:check` goal runs automatically during the `compile` phase, so the build will fail if code is not correctly formatted.
+5. Run `mvn clean verify`
+6. Submit a pull request
