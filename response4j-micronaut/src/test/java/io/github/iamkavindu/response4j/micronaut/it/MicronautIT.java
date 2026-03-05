@@ -12,9 +12,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @MicronautTest
-class MicronautIntegrationTest {
+class MicronautIT {
 
     @Inject
     @Client("/")
@@ -26,8 +27,9 @@ class MicronautIntegrationTest {
                 HttpRequest.GET("/test/success/method").accept(MediaType.APPLICATION_JSON_TYPE),
                 String.class
         );
-        assert response.getStatus() == HttpStatus.OK;
-        assert response.getContentType().orElse(null) != null;
+        assertEquals(HttpStatus.OK, response.getStatus());
+        assertTrue(response.getContentType().isPresent());
+        assertTrue(response.getContentType().get().toString().contains("application/json"));
     }
 
     @Test
@@ -36,7 +38,7 @@ class MicronautIntegrationTest {
                 HttpRequest.GET("/test/success/class").accept(MediaType.APPLICATION_JSON_TYPE),
                 String.class
         );
-        assert response.getStatus() == HttpStatus.CREATED;
+        assertEquals(HttpStatus.CREATED, response.getStatus());
     }
 
     @Test
@@ -45,7 +47,7 @@ class MicronautIntegrationTest {
                 HttpRequest.GET("/test/success/wrap-false").accept(MediaType.APPLICATION_JSON_TYPE),
                 String.class
         );
-        assert response.getStatus() == HttpStatus.OK;
+        assertEquals(HttpStatus.OK, response.getStatus());
     }
 
     @Test
@@ -54,7 +56,7 @@ class MicronautIntegrationTest {
                 HttpRequest.GET("/test/success/already-wrapped").accept(MediaType.APPLICATION_JSON_TYPE),
                 String.class
         );
-        assert response.getStatus() == HttpStatus.OK;
+        assertEquals(HttpStatus.OK, response.getStatus());
     }
 
     @Test
@@ -90,4 +92,3 @@ class MicronautIntegrationTest {
         assertEquals(500, ex.getStatus().getCode());
     }
 }
-
