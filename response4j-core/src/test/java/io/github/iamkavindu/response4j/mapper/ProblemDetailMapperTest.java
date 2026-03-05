@@ -1,199 +1,191 @@
 package io.github.iamkavindu.response4j.mapper;
 
+
 import io.github.iamkavindu.response4j.annotation.ProblemExtension;
 import io.github.iamkavindu.response4j.annotation.ProblemResponse;
 import io.github.iamkavindu.response4j.model.ProblemDetail;
 import io.github.iamkavindu.response4j.model.ProblemTypes;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.net.URI;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * Tests for {@link ProblemDetailMapper}.
- */
 class ProblemDetailMapperTest {
 
-    private ProblemDetailMapper mapper;
+    private final ProblemDetailMapper mapper = new ProblemDetailMapper();
 
-    @BeforeEach
-    void setUp() {
-        mapper = new ProblemDetailMapper();
+    @ProblemResponse(
+            status = 400,
+            title = "Bad Request",
+            type = "https://api.example.com/problems/bad-request",
+            detail = "Request is invalid",
+            includeExceptionMessage = false
+    )
+    static class FullyAnnotatedException extends RuntimeException {
+        FullyAnnotatedException() {
+            super("ignored message");
+        }
     }
-
-    @Test
-    void mapShouldReturnInternalServerErrorForUnAnnotatedException() {
-        Exception exception = new RuntimeException("Something went wrong");
-
-        ProblemDetail problem = mapper.map(exception);
-
-        assertEquals(ProblemTypes.ABOUT_BLANK, problem.type());
-        assertEquals("Internal Server Error", problem.title()); // RFC 9457: about:blank requires HTTP reason phrase
-        assertEquals(500, problem.status());
-        assertEquals("Something went wrong", problem.detail());
-        assertNull(problem.instance());
-    }
-
-    @Test
-    void mapShouldUseAnnotationValues() {
-        Exception exception = new TestNotFoundException(42L);
-
-        ProblemDetail problem = mapper.map(exception);
-
-        assertEquals(URI.create("https://api.example.com/errors/not-found"), problem.type());
-        assertEquals("Resource Not Found", problem.title());
-        assertEquals(404, problem.status());
-        assertEquals("User with id 42 not found", problem.detail());
-    }
-
-    @Test
-    void mapShouldUseHttpReasonPhraseWhenTypeIsAboutBlankAndTitleIsBlank() {
-        Exception exception = new TestBadRequestException();
-
-        ProblemDetail problem = mapper.map(exception);
-
-        assertEquals(ProblemTypes.ABOUT_BLANK, problem.type());
-        assertEquals("Bad Request", problem.title()); // RFC 9457 Section 4.2.1
-        assertEquals(400, problem.status());
-    }
-
-    @Test
-    void mapShouldUseExceptionClassNameWhenTitleIsBlankAndTypeIsNotAboutBlank() {
-        Exception exception = new TestValidationException();
-
-        ProblemDetail problem = mapper.map(exception);
-
-        assertEquals(URI.create("https://api.example.com/errors/validation"), problem.type());
-        assertEquals("TestValidationException", problem.title()); // Falls back to class name
-        assertEquals(400, problem.status());
-    }
-
-    @Test
-    void mapWithInstanceShouldPopulateInstanceField() {
-        Exception exception = new TestNotFoundException(42L);
-
-        ProblemDetail problem = mapper.map(exception, "/api/users/42");
-
-        assertEquals("/api/users/42", problem.instance());
-    }
-
-    @Test
-    void mapShouldIncludeExtensionsFromAnnotation() {
-        Exception exception = new TestExceptionWithExtensions();
-
-        ProblemDetail problem = mapper.map(exception);
-
-        assertNotNull(problem.extensions());
-        assertEquals("https://api.example.com/docs", problem.extensions().get("docs"));
-        assertEquals("support@example.com", problem.extensions().get("supportEmail"));
-    }
-
-    @Test
-    void mapShouldHandleMultipleExtensions() {
-        Exception exception = new TestExceptionWithMultipleExtensions();
-
-        ProblemDetail problem = mapper.map(exception);
-
-        assertNotNull(problem.extensions());
-        assertEquals(3, problem.extensions().size());
-        assertEquals("value1", problem.extensions().get("key1"));
-        assertEquals("value2", problem.extensions().get("key2"));
-        assertEquals("value3", problem.extensions().get("key3"));
-    }
-
-    @Test
-    void mapShouldNotIncludeExtensionsWhenNonePresent() {
-        Exception exception = new TestNotFoundException(42L);
-
-        ProblemDetail problem = mapper.map(exception);
-
-        assertNull(problem.extensions());
-    }
-
-    @Test
-    void mapShouldUseHttpReasonPhraseFor404() {
-        Exception exception = new TestNotFoundException(42L);
-
-        ProblemDetail problem = mapper.map(exception);
-
-        // Even though annotation has a custom type, title is set
-        assertEquals("Resource Not Found", problem.title());
-    }
-
-    @Test
-    void mapShouldHandleNullExceptionMessage() {
-        Exception exception = new TestExceptionWithNullMessage();
-
-        ProblemDetail problem = mapper.map(exception);
-
-        assertEquals("", problem.detail());
-    }
-
-    // Test exception classes
 
     @ProblemResponse(
             status = 404,
-            title = "Resource Not Found",
-            type = "https://api.example.com/errors/not-found"
+            title = "",
+            type = "about:blank",
+            detail = "",
+            includeExceptionMessage = false
     )
-    static class TestNotFoundException extends RuntimeException {
-        public TestNotFoundException(Long id) {
-            super("User with id " + id + " not found");
+    static class AboutBlankNoTitleException extends RuntimeException {
+        AboutBlankNoTitleException() {
+            super("ignored");
         }
     }
 
     @ProblemResponse(
-            status = 400
+            status = 422,
+            title = "",
+            type = "https://api.example.com/problems/validation",
+            detail = "",
+            includeExceptionMessage = true
     )
-    static class TestBadRequestException extends RuntimeException {
-        public TestBadRequestException() {
-            super("Invalid request");
+    static class BlankTitleAndDetailUseDefaultsException extends RuntimeException {
+        BlankTitleAndDetailUseDefaultsException(String message) {
+            super(message);
+        }
+    }
+
+    @ProblemResponse(
+            status = 499,
+            title = "",
+            type = "about:blank",
+            detail = "",
+            includeExceptionMessage = true
+    )
+    static class UnknownStatusAboutBlankException extends RuntimeException {
+        UnknownStatusAboutBlankException(String message) {
+            super(message);
         }
     }
 
     @ProblemResponse(
             status = 400,
-            type = "https://api.example.com/errors/validation"
-            // title is blank but type is not about:blank, should use class name
+            title = "Custom Error",
+            type = "https://api.example.com/problems/custom",
+            detail = "custom error with extensions",
+            includeExceptionMessage = false
     )
-    static class TestValidationException extends RuntimeException {
-        public TestValidationException() {
-            super("Validation failed");
-        }
-    }
-
-    @ProblemResponse(
-            status = 400,
-            title = "Test Error"
-    )
-    @ProblemExtension(key = "docs", value = "https://api.example.com/docs")
+    @ProblemExtension(key = "docs", value = "https://api.example.com/docs/errors/custom")
     @ProblemExtension(key = "supportEmail", value = "support@example.com")
-    static class TestExceptionWithExtensions extends RuntimeException {
-        public TestExceptionWithExtensions() {
-            super("Test error with extensions");
+    static class WithExtensionsException extends RuntimeException {
+        WithExtensionsException() {
+            super("has extensions");
         }
     }
 
-    @ProblemResponse(
-            title = "Internal Error"
-    )
-    @ProblemExtension(key = "key1", value = "value1")
-    @ProblemExtension(key = "key2", value = "value2")
-    @ProblemExtension(key = "key3", value = "value3")
-    static class TestExceptionWithMultipleExtensions extends RuntimeException {
-        public TestExceptionWithMultipleExtensions() {
-            super("Multiple extensions");
+    static class UnannotatedException extends RuntimeException {
+        UnannotatedException(String message) {
+            super(message);
         }
     }
 
-    @ProblemResponse(
-            title = "Null Message Error"
-    )
-    static class TestExceptionWithNullMessage extends RuntimeException {
-        public TestExceptionWithNullMessage() {
-            super((String) null);
+    static class UnannotatedNullMessageException extends RuntimeException {
+        UnannotatedNullMessageException() {
+            super("");
         }
+    }
+
+    @Test
+    void map_withProblemResponse_usesAnnotationValues() {
+        var ex = new FullyAnnotatedException();
+
+        ProblemDetail pd = mapper.map(ex, "/test/instance");
+
+        assertThat(pd.status()).isEqualTo(400);
+        assertThat(pd.title()).isEqualTo("Bad Request");
+        assertThat(pd.type()).isEqualTo(URI.create("https://api.example.com/problems/bad-request"));
+        assertThat(pd.detail()).isEqualTo("Request is invalid");
+        assertThat(pd.instance()).isEqualTo("/test/instance");
+        assertThat(pd.extensions()).isNull();
+    }
+
+    @Test
+    void map_withAboutBlankAndBlankTitle_usesHttpReasonPhrase() {
+        var ex = new AboutBlankNoTitleException();
+
+        ProblemDetail pd = mapper.map(ex, "/resource/42");
+
+        assertThat(pd.type()).isEqualTo(ProblemTypes.ABOUT_BLANK);
+        assertThat(pd.status()).isEqualTo(404);
+        assertThat(pd.title()).isEqualTo("Not Found");
+        assertThat(pd.detail()).isEmpty();
+        assertThat(pd.instance()).isEqualTo("/resource/42");
+    }
+
+    @Test
+    void map_withBlankTitleAndDetail_usesClassNameAndExceptionMessage() {
+        var ex = new BlankTitleAndDetailUseDefaultsException("validation failed for field x");
+
+        ProblemDetail pd = mapper.map(ex, "/validation");
+
+        assertThat(pd.status()).isEqualTo(422);
+        assertThat(pd.title()).isEqualTo(BlankTitleAndDetailUseDefaultsException.class.getSimpleName());
+        assertThat(pd.detail()).isEqualTo("validation failed for field x");
+        assertThat(pd.type()).isEqualTo(URI.create("https://api.example.com/problems/validation"));
+        assertThat(pd.instance()).isEqualTo("/validation");
+    }
+
+    @Test
+    void map_withUnknownStatusAndAboutBlank_usesHttpErrorTitle() {
+        var ex = new UnknownStatusAboutBlankException("something odd");
+
+        ProblemDetail pd = mapper.map(ex, "/odd");
+
+        assertThat(pd.status()).isEqualTo(499);
+        assertThat(pd.type()).isEqualTo(ProblemTypes.ABOUT_BLANK);
+        assertThat(pd.title()).isEqualTo("HTTP Error 499");
+        assertThat(pd.detail()).isEqualTo("something odd");
+    }
+
+    @Test
+    void map_withProblemExtensions_addsAllExtensions() {
+        var ex = new WithExtensionsException();
+
+        ProblemDetail pd = mapper.map(ex, "/ext");
+
+        assertThat(pd.extensions())
+                .isNotNull()
+                .containsEntry("docs", "https://api.example.com/docs/errors/custom")
+                .containsEntry("supportEmail", "support@example.com");
+    }
+
+    @Test
+    void map_withoutProblemResponse_usesDefault500AndAboutBlank() {
+        var ex = new UnannotatedException("default failure");
+
+        ProblemDetail pd = mapper.map(ex, "/default");
+
+        assertThat(pd.status()).isEqualTo(500);
+        assertThat(pd.type()).isEqualTo(ProblemTypes.ABOUT_BLANK);
+        assertThat(pd.title()).isEqualTo("Internal Server Error");
+        assertThat(pd.detail()).isEqualTo("default failure");
+        assertThat(pd.instance()).isEqualTo("/default");
+        assertThat(pd.extensions()).isNull();
+    }
+
+    @Test
+    void map_withoutProblemResponse_andNullMessage_usesEmptyDetail() {
+        var ex = new UnannotatedNullMessageException();
+
+        ProblemDetail pd = mapper.map(ex, "/null-message");
+        assertThat(pd.detail()).isEmpty();
+    }
+
+    @Test
+    void map_withoutInstance_overloadSetsNullInstance() {
+        var ex = new UnannotatedException("no instance");
+
+        ProblemDetail pd = mapper.map(ex);
+        assertThat(pd.instance()).isNull();
+        assertThat(pd.status()).isEqualTo(500);
     }
 }

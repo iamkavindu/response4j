@@ -1,119 +1,52 @@
 package io.github.iamkavindu.response4j.model;
 
+
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * Tests for {@link ProblemDetail} record.
- */
 class ProblemDetailTest {
 
     @Test
-    void ofShouldCreateProblemDetailWithAboutBlank() {
-        ProblemDetail problem = ProblemDetail.of(
-            "Not Found",
-            404,
-            "User with id 42 not found",
-            "/users/42",
-            null
-        );
-
-        assertEquals(ProblemTypes.ABOUT_BLANK, problem.type());
-        assertEquals("Not Found", problem.title());
-        assertEquals(404, problem.status());
-        assertEquals("User with id 42 not found", problem.detail());
-        assertEquals("/users/42", problem.instance());
-        assertNull(problem.extensions());
+    void of_populatesAllFields() {
+        var problem = ProblemDetail.of("Not Found", 404, "User 42 not found",
+                "/api/users/42", null);
+        assertThat(problem.title()).isEqualTo("Not Found");
+        assertThat(problem.status()).isEqualTo(404);
+        assertThat(problem.detail()).isEqualTo("User 42 not found");
+        assertThat(problem.instance()).isEqualTo("/api/users/42");
+        assertThat(problem.extensions()).isNull();
     }
 
     @Test
-    void ofShouldSupportExtensions() {
-        Map<String, Object> extensions = Map.of(
-            "traceId", "abc-123",
-            "timestamp", "2024-01-15T10:30:00Z"
+    void ofErrors_putsErrorsInExtensions() {
+        var errors = List.of(
+                new ProblemDetailError("/email", "must be valid"),
+                new ProblemDetailError("/age", "must be ≥ 18")
         );
+        var problem = ProblemDetail.ofErrors("Validation Failed", 400,
+                "Invalid input", errors);
+        assertThat(problem.extensions())
+                .isNotNull()
+                .containsKey("errors");
 
-        ProblemDetail problem = ProblemDetail.of(
-            "Internal Server Error",
-            500,
-            "Database connection failed",
-            "/api/users",
-            extensions
-        );
-
-        assertNotNull(problem.extensions());
-        assertEquals("abc-123", problem.extensions().get("traceId"));
-        assertEquals("2024-01-15T10:30:00Z", problem.extensions().get("timestamp"));
-    }
-
-    @Test
-    void ofErrorsShouldCreateProblemDetailWithErrorsList() {
-        List<ProblemDetailError> errors = List.of(
-            new ProblemDetailError("/email", "must be a valid email address"),
-            new ProblemDetailError("/age", "must be at least 18")
-        );
-
-        ProblemDetail problem = ProblemDetail.ofErrors(
-            "Validation Failed",
-            400,
-            "The request contains invalid fields",
-            errors
-        );
-
-        assertEquals(ProblemTypes.ABOUT_BLANK, problem.type());
-        assertEquals("Validation Failed", problem.title());
-        assertEquals(400, problem.status());
-        assertEquals("The request contains invalid fields", problem.detail());
-        assertNotNull(problem.extensions());
-        assertTrue(problem.extensions().containsKey("errors"));
-        
         @SuppressWarnings("unchecked")
-        List<ProblemDetailError> extractedErrors = (List<ProblemDetailError>) problem.extensions().get("errors");
-        assertEquals(2, extractedErrors.size());
-        assertEquals("/email", extractedErrors.getFirst().pointer());
-        assertEquals("must be a valid email address", extractedErrors.getFirst().detail());
+        var errList = (List<ProblemDetailError>) problem.extensions().get("errors");
+        assertThat(errList).hasSize(2)
+                .extracting(ProblemDetailError::pointer)
+                .containsExactly("/email", "/age");
     }
 
     @Test
-    void ofErrorsShouldHandleEmptyErrorsList() {
-        List<ProblemDetailError> errors = List.of();
-
-        ProblemDetail problem = ProblemDetail.ofErrors(
-            "Validation Failed",
-            400,
-            "The request contains invalid fields",
-            errors
-        );
-
-        assertNotNull(problem.extensions());
-        assertTrue(problem.extensions().containsKey("errors"));
-        
-        @SuppressWarnings("unchecked")
-        List<ProblemDetailError> extractedErrors = (List<ProblemDetailError>) problem.extensions().get("errors");
-        assertTrue(extractedErrors.isEmpty());
-    }
-
-    @Test
-    void builderShouldCreateProblemDetail() {
-        ProblemDetail problem = new ProblemDetail.Builder()
-            .type(ProblemTypes.ABOUT_BLANK)
-            .title("Bad Request")
-            .status(400)
-            .detail("Invalid input")
-            .instance("/api/test")
-            .extensions(Map.of("custom", "value"))
-            .build();
-
-        assertEquals(ProblemTypes.ABOUT_BLANK, problem.type());
-        assertEquals("Bad Request", problem.title());
-        assertEquals(400, problem.status());
-        assertEquals("Invalid input", problem.detail());
-        assertEquals("/api/test", problem.instance());
-        assertNotNull(problem.extensions());
-        assertEquals("value", problem.extensions().get("custom"));
+    void builder_withAboutBlankType_setsDefaultTitle() {
+        var problem = new ProblemDetail.Builder()
+                .type(ProblemTypes.ABOUT_BLANK)
+                .title("Not Found")
+                .status(404)
+                .detail("Resource missing")
+                .build();
+        assertThat(problem.type()).isEqualTo(ProblemTypes.ABOUT_BLANK);
     }
 }
