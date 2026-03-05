@@ -5,9 +5,13 @@ import io.micronaut.http.HttpStatus;
 import io.micronaut.http.MediaType;
 import io.micronaut.http.client.HttpClient;
 import io.micronaut.http.client.annotation.Client;
+import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @MicronautTest
 class MicronautIntegrationTest {
@@ -55,29 +59,35 @@ class MicronautIntegrationTest {
 
     @Test
     void annotatedException_isMappedToProblemDetail() {
-        var response = client.toBlocking().exchange(
-                HttpRequest.GET("/test/error/annotated").accept(MediaType.APPLICATION_JSON_TYPE),
-                String.class
+        var ex = assertThrows(HttpClientResponseException.class, () ->
+                client.toBlocking().exchange(
+                        HttpRequest.GET("/test/error/annotated").accept(MediaType.APPLICATION_JSON_TYPE),
+                        String.class
+                )
         );
-        assert response.getStatus() == HttpStatus.BAD_REQUEST;
+        assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
     }
 
     @Test
     void aboutBlankAnnotatedException_usesReasonPhraseForTitle() {
-        var response = client.toBlocking().exchange(
-                HttpRequest.GET("/test/error/about-blank").accept(MediaType.APPLICATION_JSON_TYPE),
-                String.class
+        var ex = assertThrows(HttpClientResponseException.class, () ->
+                client.toBlocking().exchange(
+                        HttpRequest.GET("/test/error/about-blank").accept(MediaType.APPLICATION_JSON_TYPE),
+                        String.class
+                )
         );
-        assert response.getStatus() == HttpStatus.NOT_FOUND;
+        assertEquals(HttpStatus.NOT_FOUND, ex.getStatus());
     }
 
     @Test
     void unannotatedException_usesDefault500ProblemDetail() {
-        var response = client.toBlocking().exchange(
-                HttpRequest.GET("/test/error/unannotated").accept(MediaType.APPLICATION_JSON_TYPE),
-                String.class
+        var ex = assertThrows(HttpClientResponseException.class, () ->
+                client.toBlocking().exchange(
+                        HttpRequest.GET("/test/error/unannotated").accept(MediaType.APPLICATION_JSON_TYPE),
+                        String.class
+                )
         );
-        assert response.getStatus().getCode() == 500;
+        assertEquals(500, ex.getStatus().getCode());
     }
 }
 
