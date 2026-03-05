@@ -1,12 +1,10 @@
 package io.github.iamkavindu.response4j.mapper;
 
+import static org.assertj.core.api.Assertions.assertThat;
 
 import io.github.iamkavindu.response4j.annotation.SuccessResponse;
-import org.junit.jupiter.api.Test;
-
 import java.lang.annotation.Annotation;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
 
 class ApiResponseMapperTest {
 
@@ -50,10 +48,21 @@ class ApiResponseMapperTest {
 
     private SuccessResponse successResponse(int status, String message, boolean wrap) {
         return new SuccessResponse() {
-            public Class<? extends Annotation> annotationType() { return SuccessResponse.class; }
-            public int status() { return status; }
-            public String message() { return message; }
-            public boolean wrap() { return wrap; }
+            public Class<? extends Annotation> annotationType() {
+                return SuccessResponse.class;
+            }
+
+            public int status() {
+                return status;
+            }
+
+            public String message() {
+                return message;
+            }
+
+            public boolean wrap() {
+                return wrap;
+            }
         };
     }
 }

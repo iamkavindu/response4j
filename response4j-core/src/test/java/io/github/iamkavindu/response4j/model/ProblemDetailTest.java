@@ -1,18 +1,15 @@
 package io.github.iamkavindu.response4j.model;
 
-
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
 
 class ProblemDetailTest {
 
     @Test
     void of_populatesAllFields() {
-        var problem = ProblemDetail.of("Not Found", 404, "User 42 not found",
-                "/api/users/42", null);
+        var problem = ProblemDetail.of("Not Found", 404, "User 42 not found", "/api/users/42", null);
         assertThat(problem.title()).isEqualTo("Not Found");
         assertThat(problem.status()).isEqualTo(404);
         assertThat(problem.detail()).isEqualTo("User 42 not found");
@@ -23,20 +20,13 @@ class ProblemDetailTest {
     @Test
     void ofErrors_putsErrorsInExtensions() {
         var errors = List.of(
-                new ProblemDetailError("/email", "must be valid"),
-                new ProblemDetailError("/age", "must be ≥ 18")
-        );
-        var problem = ProblemDetail.ofErrors("Validation Failed", 400,
-                "Invalid input", errors);
-        assertThat(problem.extensions())
-                .isNotNull()
-                .containsKey("errors");
+                new ProblemDetailError("/email", "must be valid"), new ProblemDetailError("/age", "must be ≥ 18"));
+        var problem = ProblemDetail.ofErrors("Validation Failed", 400, "Invalid input", errors);
+        assertThat(problem.extensions()).isNotNull().containsKey("errors");
 
         @SuppressWarnings("unchecked")
         var errList = (List<ProblemDetailError>) problem.extensions().get("errors");
-        assertThat(errList).hasSize(2)
-                .extracting(ProblemDetailError::pointer)
-                .containsExactly("/email", "/age");
+        assertThat(errList).hasSize(2).extracting(ProblemDetailError::pointer).containsExactly("/email", "/age");
     }
 
     @Test

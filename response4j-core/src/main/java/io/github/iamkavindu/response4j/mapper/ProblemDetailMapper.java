@@ -4,7 +4,6 @@ import io.github.iamkavindu.response4j.annotation.ProblemExtension;
 import io.github.iamkavindu.response4j.annotation.ProblemResponse;
 import io.github.iamkavindu.response4j.model.ProblemDetail;
 import io.github.iamkavindu.response4j.model.ProblemTypes;
-
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
@@ -52,8 +51,7 @@ public class ProblemDetailMapper {
      * @return a {@code ProblemDetail} representing the error with the instance field set
      */
     public ProblemDetail map(Throwable exception, String instance) {
-        ProblemResponse annotation = exception.getClass()
-                .getAnnotation(ProblemResponse.class);
+        ProblemResponse annotation = exception.getClass().getAnnotation(ProblemResponse.class);
 
         if (annotation != null) {
             return mapFromAnnotation(exception, annotation, instance);
@@ -112,22 +110,20 @@ public class ProblemDetailMapper {
             case 508 -> "Loop Detected";
             case 510 -> "Not Extended";
             case 511 -> "Network Authentication Required";
-            default  -> "HTTP Error " + status;
+            default -> "HTTP Error " + status;
         };
     }
 
     private ProblemDetail mapFromAnnotation(Throwable exception, ProblemResponse annotation, String instance) {
         URI type = URI.create(annotation.type());
         int status = annotation.status();
-        
+
         // Per RFC 9457 Section 4.2.1: when type is about:blank, title MUST be HTTP reason phrase
         String title;
         if (ProblemTypes.ABOUT_BLANK.equals(type) && annotation.title().isBlank()) {
             title = httpReasonPhrase(status);
         } else {
-            title = annotation.title().isBlank()
-                    ? exception.getClass().getSimpleName()
-                    : annotation.title();
+            title = annotation.title().isBlank() ? exception.getClass().getSimpleName() : annotation.title();
         }
 
         String detail = annotation.detail().isBlank() && annotation.includeExceptionMessage()
@@ -156,14 +152,13 @@ public class ProblemDetailMapper {
      */
     private Map<String, Object> extractExtensions(Throwable exception) {
         Map<String, Object> extensions = new HashMap<>();
-        
-        ProblemExtension[] extensionAnnotations = exception.getClass()
-                .getAnnotationsByType(ProblemExtension.class);
-        
+
+        ProblemExtension[] extensionAnnotations = exception.getClass().getAnnotationsByType(ProblemExtension.class);
+
         for (ProblemExtension ext : extensionAnnotations) {
             extensions.put(ext.key(), ext.value());
         }
-        
+
         return extensions;
     }
 

@@ -2,12 +2,11 @@ package io.github.iamkavindu.response4j.spring.it.controller;
 
 import io.github.iamkavindu.response4j.annotation.SuccessResponse;
 import io.github.iamkavindu.response4j.model.ApiResponse;
+import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Map;
 
 /**
  * Test-only controller that exercises response4j success wrapping
@@ -48,4 +47,3 @@ public class TestSuccessController {
         return ResponseEntity.ok(body);
     }
 }
-

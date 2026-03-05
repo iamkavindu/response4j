@@ -45,8 +45,7 @@ public class Response4jExceptionHandler {
     public ResponseEntity<ProblemDetail> handleException(ServletWebRequest request, Exception exception) {
         String instance = request.toString();
         ProblemDetail problemDetail = problemDetailMapper.map(exception, instance);
-        return ResponseEntity
-                .status(problemDetail.status())
+        return ResponseEntity.status(problemDetail.status())
                 .contentType(MediaType.APPLICATION_PROBLEM_JSON)
                 .body(problemDetail);
     }

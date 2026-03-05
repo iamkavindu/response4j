@@ -54,10 +54,7 @@ public class Response4jExceptionHandler implements ExceptionHandler<Exception, H
         String instance = request.getUri().getPath();
         ProblemDetail problemDetail = problemDetailMapper.map(exception, instance);
 
-        return HttpResponse
-                .<ProblemDetail>status(
-                        HttpStatus.valueOf(problemDetail.status())
-                )
+        return HttpResponse.<ProblemDetail>status(HttpStatus.valueOf(problemDetail.status()))
                 .contentType("application/problem+json")
                 .body(problemDetail);
     }

@@ -9,4 +9,3 @@ public class TestQuarkusApplication {
         Quarkus.run(args);
     }
 }
-

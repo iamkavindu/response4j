@@ -1,21 +1,21 @@
 package io.github.iamkavindu.response4j.quarkus.it;
 
-import io.quarkus.test.junit.QuarkusTest;
-import org.junit.jupiter.api.Test;
-
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 
+import io.quarkus.test.junit.QuarkusTest;
+import org.junit.jupiter.api.Test;
+
 @QuarkusTest
 class QuarkusIT {
 
     @Test
     void methodLevelSuccessResponse_isWrappedWithApiResponse() {
-        given()
-                .when().get("/test/success/method")
+        given().when()
+                .get("/test/success/method")
                 .then()
                 .statusCode(200)
                 .contentType(containsString("application/json"))
@@ -27,8 +27,8 @@ class QuarkusIT {
 
     @Test
     void classLevelSuccessResponse_usesClassAnnotation() {
-        given()
-                .when().get("/test/success/class")
+        given().when()
+                .get("/test/success/class")
                 .then()
                 .statusCode(201)
                 .body("status", equalTo(201))
@@ -38,8 +38,8 @@ class QuarkusIT {
 
     @Test
     void wrapFalse_returnsRawBodyWithoutEnvelope() {
-        given()
-                .when().get("/test/success/wrap-false")
+        given().when()
+                .get("/test/success/wrap-false")
                 .then()
                 .statusCode(200)
                 .body("wrapped", equalTo(false))
@@ -49,8 +49,8 @@ class QuarkusIT {
 
     @Test
     void alreadyWrappedApiResponse_isPassedThrough() {
-        given()
-                .when().get("/test/success/already-wrapped")
+        given().when()
+                .get("/test/success/already-wrapped")
                 .then()
                 .statusCode(200)
                 .body("status", equalTo(200))
@@ -60,8 +60,8 @@ class QuarkusIT {
 
     @Test
     void annotatedException_isMappedToProblemDetail() {
-        given()
-                .when().get("/test/error/annotated")
+        given().when()
+                .get("/test/error/annotated")
                 .then()
                 .statusCode(400)
                 .contentType(containsString("application/problem+json"))
@@ -74,8 +74,8 @@ class QuarkusIT {
 
     @Test
     void aboutBlankAnnotatedException_usesReasonPhraseForTitle() {
-        given()
-                .when().get("/test/error/about-blank")
+        given().when()
+                .get("/test/error/about-blank")
                 .then()
                 .statusCode(404)
                 .body("type", equalTo("about:blank"))
@@ -85,8 +85,8 @@ class QuarkusIT {
 
     @Test
     void unannotatedException_usesDefault500ProblemDetail() {
-        given()
-                .when().get("/test/error/unannotated")
+        given().when()
+                .get("/test/error/unannotated")
                 .then()
                 .statusCode(500)
                 .body("type", equalTo("about:blank"))

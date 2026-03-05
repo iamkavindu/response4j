@@ -12,20 +12,11 @@ public class TestErrorResource {
             title = "Bad Request",
             type = "https://api.example.com/problems/bad-request",
             detail = "Request is invalid",
-            includeExceptionMessage = false
-    )
-    public static class AnnotatedBadRequestException extends RuntimeException {
-    }
+            includeExceptionMessage = false)
+    public static class AnnotatedBadRequestException extends RuntimeException {}
 
-    @ProblemResponse(
-            status = 404,
-            title = "",
-            type = "about:blank",
-            detail = "",
-            includeExceptionMessage = false
-    )
-    public static class AboutBlankNotFoundException extends RuntimeException {
-    }
+    @ProblemResponse(status = 404, title = "", type = "about:blank", detail = "", includeExceptionMessage = false)
+    public static class AboutBlankNotFoundException extends RuntimeException {}
 
     public static class UnannotatedException extends RuntimeException {
         public UnannotatedException(String message) {
@@ -51,4 +42,3 @@ public class TestErrorResource {
         throw new UnannotatedException("failure");
     }
 }
-

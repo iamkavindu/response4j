@@ -1,15 +1,13 @@
 package io.github.iamkavindu.response4j.mapper;
 
+import static org.assertj.core.api.Assertions.assertThat;
 
 import io.github.iamkavindu.response4j.annotation.ProblemExtension;
 import io.github.iamkavindu.response4j.annotation.ProblemResponse;
 import io.github.iamkavindu.response4j.model.ProblemDetail;
 import io.github.iamkavindu.response4j.model.ProblemTypes;
-import org.junit.jupiter.api.Test;
-
 import java.net.URI;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
 
 class ProblemDetailMapperTest {
 
@@ -20,21 +18,14 @@ class ProblemDetailMapperTest {
             title = "Bad Request",
             type = "https://api.example.com/problems/bad-request",
             detail = "Request is invalid",
-            includeExceptionMessage = false
-    )
+            includeExceptionMessage = false)
     static class FullyAnnotatedException extends RuntimeException {
         FullyAnnotatedException() {
             super("ignored message");
         }
     }
 
-    @ProblemResponse(
-            status = 404,
-            title = "",
-            type = "about:blank",
-            detail = "",
-            includeExceptionMessage = false
-    )
+    @ProblemResponse(status = 404, title = "", type = "about:blank", detail = "", includeExceptionMessage = false)
     static class AboutBlankNoTitleException extends RuntimeException {
         AboutBlankNoTitleException() {
             super("ignored");
@@ -46,21 +37,14 @@ class ProblemDetailMapperTest {
             title = "",
             type = "https://api.example.com/problems/validation",
             detail = "",
-            includeExceptionMessage = true
-    )
+            includeExceptionMessage = true)
     static class BlankTitleAndDetailUseDefaultsException extends RuntimeException {
         BlankTitleAndDetailUseDefaultsException(String message) {
             super(message);
         }
     }
 
-    @ProblemResponse(
-            status = 499,
-            title = "",
-            type = "about:blank",
-            detail = "",
-            includeExceptionMessage = true
-    )
+    @ProblemResponse(status = 499, title = "", type = "about:blank", detail = "", includeExceptionMessage = true)
     static class UnknownStatusAboutBlankException extends RuntimeException {
         UnknownStatusAboutBlankException(String message) {
             super(message);
@@ -72,8 +56,7 @@ class ProblemDetailMapperTest {
             title = "Custom Error",
             type = "https://api.example.com/problems/custom",
             detail = "custom error with extensions",
-            includeExceptionMessage = false
-    )
+            includeExceptionMessage = false)
     @ProblemExtension(key = "docs", value = "https://api.example.com/docs/errors/custom")
     @ProblemExtension(key = "supportEmail", value = "support@example.com")
     static class WithExtensionsException extends RuntimeException {

@@ -8,4 +8,3 @@ public class TestMicronautApplication {
         Micronaut.run(TestMicronautApplication.class, args);
     }
 }
-
