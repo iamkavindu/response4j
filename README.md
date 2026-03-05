@@ -300,18 +300,26 @@ Use `response4j-core` without Spring for manual mapping and serialization:
 
 ```java
 // Success response
-ApiResponse<User> response = ApiResponse.ok(user);
+ApiResponse<User> ok = ApiResponse.ok(user);
 ApiResponse<User> created = ApiResponse.created(user);
 ApiResponse<?> noContent = ApiResponse.noContent();
 
 // Custom response
 ApiResponse<Order> custom = ApiResponse.of(200, "Order processed", order);
 
+// Using ApiResponse.Builder for full control
+ApiResponse<User> response = new ApiResponse.Builder<User>()
+    .status(200)
+    .message("User retrieved")
+    .timestamp(Instant.now())
+    .data(user)
+    .build();
+
 // Problem details
 ProblemDetail problem = ProblemDetail.of("Not Found", 404, "Resource not found", null, null);
 
-// Using ProblemTypes constants
-ProblemDetail.Builder builder = new ProblemDetail.Builder()
+// Using ProblemDetail.Builder for full control
+ProblemDetail notFound = new ProblemDetail.Builder()
     .type(ProblemTypes.ABOUT_BLANK)
     .title("Not Found")
     .status(404)
@@ -342,7 +350,26 @@ ProblemDetail validation = ProblemDetail.ofErrors(
 | `timestamp` | `Instant` | UTC timestamp (ISO-8601) |
 | `data`      | `T`       | Optional payload         |
 
-Factory methods: `of(status, message, data)`, `empty(status, message)`, `ok(data)`, `created(data)`, `noContent()`.
+Factory methods:
+
+| Method                        | Status | Default message              |
+|-------------------------------|--------|------------------------------|
+| `of(status, message, data)`   | custom | custom                       |
+| `empty(status, message)`      | custom | custom (data is `{}`)        |
+| `ok(data)`                    | `200`  | `"Request successful"`       |
+| `created(data)`               | `201`  | `"Request created successful"` |
+| `noContent()`                 | `204`  | `"No content"` (data is `{}`) |
+
+Use `ApiResponse.Builder<T>` for full field control:
+
+```java
+ApiResponse<User> response = new ApiResponse.Builder<User>()
+    .status(200)
+    .message("User retrieved")
+    .timestamp(Instant.now())
+    .data(user)
+    .build();
+```
 
 ### `ProblemDetail`
 
@@ -353,9 +380,21 @@ Factory methods: `of(status, message, data)`, `empty(status, message)`, `ok(data
 | `status`     | `int`                 | HTTP status                     |
 | `detail`     | `String`              | Explanation for this occurrence |
 | `instance`   | `String`              | Optional instance URI           |
-| `extensions` | `Map<String, Object>` | Optional extra fields           |
+| `extensions` | `Map<String, Object>` | Optional extra fields (serialized as top-level JSON properties) |
 
-Factory methods: `of(title, status, detail, instance, extensions)`, `ofErrors(title, status, detail, errors)`.
+Factory methods: `of(title, status, detail, instance, extensions)`, `ofErrors(title, status, detail, errors)`. Both default `type` to `about:blank`.
+
+Use `ProblemDetail.Builder` for full field control, including custom `type` URIs:
+
+```java
+ProblemDetail problem = new ProblemDetail.Builder()
+    .type(URI.create("https://api.example.com/errors/not-found"))
+    .title("Not Found")
+    .status(404)
+    .detail("Resource not found")
+    .instance("/api/users/42")
+    .build();
+```
 
 ### `ProblemDetailError`
 
@@ -374,6 +413,25 @@ Utility class providing constants for well-known problem type URIs:
 |---------------|---------------------------------------------------------|----------------------------------------------------|
 | `ABOUT_BLANK` | `URI.create("about:blank")`                             | Indicates no specific problem type documentation   |
 | `IANA_BASE`   | `"https://iana.org/assignments/http-problem-types#"`    | Base URI for IANA-registered problem types         |
+
+### `ApiResponseMapper`
+
+Maps controller return values to `ApiResponse` instances. Used internally by all framework integration modules.
+
+| Method                          | Description                                                     |
+|---------------------------------|-----------------------------------------------------------------|
+| `map(data, annotation)`         | Maps `data` using `@SuccessResponse` annotation settings. Returns `null` when `wrap = false`, signalling the framework to pass the original body through unchanged. Falls back to `ok(data)` or `noContent()` when `annotation` is `null`. |
+
+### `ProblemDetailMapper`
+
+Maps `Throwable` instances to RFC 9457 `ProblemDetail`. Used internally by all framework integration modules.
+
+| Method                          | Description                                                     |
+|---------------------------------|-----------------------------------------------------------------|
+| `map(exception)`                | Maps `exception` without an instance URI.                       |
+| `map(exception, instance)`      | Maps `exception` with an instance URI (typically the request path). |
+
+When the exception class is annotated with `@ProblemResponse`, annotation values are used. Blank `title` falls back to the exception class simple name. When `type` is `about:blank`, `title` is replaced with the HTTP reason phrase per RFC 9457 Section 4.2.1. Unannotated exceptions produce a `500 Internal Server Error` response.
 
 ### `@SuccessResponse`
 
