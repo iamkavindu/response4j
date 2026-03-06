@@ -44,7 +44,7 @@ Add the dependency for your use case.
 
 ```xml
 <dependency>
-    <groupId>io.github.iamkavindu</groupId>
+    <groupId>io.github.response4j</groupId>
     <artifactId>response4j-core</artifactId>
     <version>0.1.0</version>
 </dependency>
@@ -54,7 +54,7 @@ Add the dependency for your use case.
 
 ```xml
 <dependency>
-    <groupId>io.github.iamkavindu</groupId>
+    <groupId>io.github.response4j</groupId>
     <artifactId>response4j-spring</artifactId>
     <version>0.1.0</version>
 </dependency>
@@ -64,7 +64,7 @@ Add the dependency for your use case.
 
 ```xml
 <dependency>
-    <groupId>io.github.iamkavindu</groupId>
+    <groupId>io.github.response4j</groupId>
     <artifactId>response4j-quarkus</artifactId>
     <version>0.1.0</version>
 </dependency>
@@ -74,7 +74,7 @@ Add the dependency for your use case.
 
 ```xml
 <dependency>
-    <groupId>io.github.iamkavindu</groupId>
+    <groupId>io.github.response4j</groupId>
     <artifactId>response4j-micronaut</artifactId>
     <version>0.1.0</version>
 </dependency>
@@ -92,7 +92,7 @@ mvn clean install
 
 ### Spring Boot
 
-With `response4j-spring` on the classpath, beans are auto-configured. No extra setup required.
+With `response4j-spring` on the classpath, beans are auto-configured. No extra setup required. Auto-configuration only activates in a servlet web application context (`@ConditionalOnWebApplication`). All registered beans (`ApiResponseMapper`, `ProblemDetailMapper`, `Response4jExceptionHandler`, `Response4jResponseBodyAdvice`) are conditional on `@ConditionalOnMissingBean`, so any of them can be replaced by declaring your own bean of the same type.
 
 #### Success responses
 
@@ -250,8 +250,8 @@ public class UserController {
 For validation scenarios with multiple field-level errors, use `ProblemDetailError` to represent individual field errors and `ProblemDetail.ofErrors()` to create a problem response containing them:
 
 ```java
-import io.github.iamkavindu.response4j.model.ProblemDetail;
-import io.github.iamkavindu.response4j.model.ProblemDetailError;
+import io.github.response4j.core.model.ProblemDetail;
+import io.github.response4j.core.model.ProblemDetailError;
 
 List<ProblemDetailError> errors = List.of(
     new ProblemDetailError("/email", "must be a valid email address"),
@@ -352,13 +352,13 @@ ProblemDetail validation = ProblemDetail.ofErrors(
 
 Factory methods:
 
-| Method                        | Status | Default message              |
-|-------------------------------|--------|------------------------------|
-| `of(status, message, data)`   | custom | custom                       |
-| `empty(status, message)`      | custom | custom (data is `{}`)        |
-| `ok(data)`                    | `200`  | `"Request successful"`       |
-| `created(data)`               | `201`  | `"Request created successful"` |
-| `noContent()`                 | `204`  | `"No content"` (data is `{}`) |
+| Method                      | Status | Default message                |
+|-----------------------------|--------|--------------------------------|
+| `of(status, message, data)` | custom | custom                         |
+| `empty(status, message)`    | custom | custom (data is `{}`)          |
+| `ok(data)`                  | `200`  | `"Request successful"`         |
+| `created(data)`             | `201`  | `"Request created successful"` |
+| `noContent()`               | `204`  | `"No content"` (data is `{}`)  |
 
 Use `ApiResponse.Builder<T>` for full field control:
 
@@ -373,13 +373,13 @@ ApiResponse<User> response = new ApiResponse.Builder<User>()
 
 ### `ProblemDetail`
 
-| Field        | Type                  | Description                     |
-|--------------|-----------------------|---------------------------------|
-| `type`       | `URI`                 | Problem type (RFC 9457)         |
-| `title`      | `String`              | Short summary                   |
-| `status`     | `int`                 | HTTP status                     |
-| `detail`     | `String`              | Explanation for this occurrence |
-| `instance`   | `String`              | Optional instance URI           |
+| Field        | Type                  | Description                                                     |
+|--------------|-----------------------|-----------------------------------------------------------------|
+| `type`       | `URI`                 | Problem type (RFC 9457)                                         |
+| `title`      | `String`              | Short summary                                                   |
+| `status`     | `int`                 | HTTP status                                                     |
+| `detail`     | `String`              | Explanation for this occurrence                                 |
+| `instance`   | `String`              | Optional instance URI                                           |
 | `extensions` | `Map<String, Object>` | Optional extra fields (serialized as top-level JSON properties) |
 
 Factory methods: `of(title, status, detail, instance, extensions)`, `ofErrors(title, status, detail, errors)`. Both default `type` to `about:blank`.
@@ -398,10 +398,10 @@ ProblemDetail problem = new ProblemDetail.Builder()
 
 ### `ProblemDetailError`
 
-| Field     | Type     | Description                                             |
-|-----------|----------|---------------------------------------------------------|
+| Field     | Type     | Description                                                    |
+|-----------|----------|----------------------------------------------------------------|
 | `pointer` | `String` | JSON Pointer (RFC 6901) or field name identifying error source |
-| `detail`  | `String` | Human-readable explanation of this specific error      |
+| `detail`  | `String` | Human-readable explanation of this specific error              |
 
 Used in `ProblemDetail.extensions` under the `"errors"` key for multi-problem responses (validation scenarios).
 
@@ -418,20 +418,20 @@ Utility class providing constants for well-known problem type URIs:
 
 Maps controller return values to `ApiResponse` instances. Used internally by all framework integration modules.
 
-| Method                          | Description                                                     |
-|---------------------------------|-----------------------------------------------------------------|
-| `map(data, annotation)`         | Maps `data` using `@SuccessResponse` annotation settings. Returns `null` when `wrap = false`, signalling the framework to pass the original body through unchanged. Falls back to `ok(data)` or `noContent()` when `annotation` is `null`. |
+| Method                  | Description                                                                                                                                                                                                                                |
+|-------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `map(data, annotation)` | Maps `data` using `@SuccessResponse` annotation settings. Returns `null` when `wrap = false`, signalling the framework to pass the original body through unchanged. Falls back to `ok(data)` or `noContent()` when `annotation` is `null`. |
 
 ### `ProblemDetailMapper`
 
 Maps `Throwable` instances to RFC 9457 `ProblemDetail`. Used internally by all framework integration modules.
 
-| Method                          | Description                                                     |
-|---------------------------------|-----------------------------------------------------------------|
-| `map(exception)`                | Maps `exception` without an instance URI.                       |
-| `map(exception, instance)`      | Maps `exception` with an instance URI (typically the request path). |
+| Method                     | Description                                                         |
+|----------------------------|---------------------------------------------------------------------|
+| `map(exception)`           | Maps `exception` without an instance URI.                           |
+| `map(exception, instance)` | Maps `exception` with an instance URI (typically the request path). |
 
-When the exception class is annotated with `@ProblemResponse`, annotation values are used. Blank `title` falls back to the exception class simple name. When `type` is `about:blank`, `title` is replaced with the HTTP reason phrase per RFC 9457 Section 4.2.1. Unannotated exceptions produce a `500 Internal Server Error` response.
+When the exception class is annotated with `@ProblemResponse`, annotation values are used. Blank `title` falls back to the exception class simple name. When `type` is `about:blank` and `title` is blank, `title` is replaced with the HTTP reason phrase per RFC 9457 Section 4.2.1. Unannotated exceptions produce a `500 Internal Server Error` response with `type: about:blank`, `title: "Internal Server Error"`, and the exception message used as the `detail` field.
 
 ### `@SuccessResponse`
 
@@ -443,20 +443,20 @@ When the exception class is annotated with `@ProblemResponse`, annotation values
 
 ### `@ProblemResponse`
 
-| Attribute                 | Default                                   | Description                                                                                     |
-|---------------------------|-------------------------------------------|-------------------------------------------------------------------------------------------------|
-| `status`                  | `500`                                     | HTTP status code                                                                                |
-| `title`                   | `""` (falls back to exception class name) | Short summary                                                                                   |
-| `type`                    | `"about:blank"`                           | Problem type URI (RFC 9457 Section 4.2.1: when `about:blank`, title must be HTTP reason phrase) |
-| `detail`                  | `""`                                      | Detail text                                                                                     |
-| `includeExceptionMessage` | `true`                                    | Use exception message as detail when `detail` is blank                                          |
+| Attribute                 | Default                                   | Description                                                                                                                                                                                                                  |
+|---------------------------|-------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `status`                  | `500`                                     | HTTP status code                                                                                                                                                                                                             |
+| `title`                   | `""` (falls back to exception class name) | Short summary                                                                                                                                                                                                                |
+| `type`                    | `"about:blank"`                           | Problem type URI. When `about:blank` and `title` is blank, title is automatically replaced with the HTTP reason phrase per RFC 9457 Section 4.2.1. When `title` is explicitly set, it is preserved as-is regardless of type. |
+| `detail`                  | `""`                                      | Detail text                                                                                                                                                                                                                  |
+| `includeExceptionMessage` | `true`                                    | Use exception message as detail when `detail` is blank                                                                                                                                                                       |
 
 ### `@ProblemExtension`
 
-| Attribute | Description                                              |
-|-----------|----------------------------------------------------------|
+| Attribute | Description                                               |
+|-----------|-----------------------------------------------------------|
 | `key`     | Extension field name (appears as top-level JSON property) |
-| `value`   | Extension field value (serialized as string)             |
+| `value`   | Extension field value (serialized as string)              |
 
 **Repeatable:** Apply multiple times on the same exception class. The `@ProblemExtensions` container annotation is auto-applied by the compiler.
 
@@ -466,9 +466,9 @@ When the exception class is annotated with `@ProblemResponse`, annotation values
 response4j/
 ├── response4j-core/          # Framework-agnostic core
 │   └── src/main/java/.../
-│       ├── annotation/       # @SuccessResponse, @ProblemResponse
+│       ├── annotation/       # @SuccessResponse, @ProblemResponse, @ProblemExtension, @ProblemExtensions
 │       ├── mapper/           # ApiResponseMapper, ProblemDetailMapper
-│       └── model/            # ApiResponse, ProblemDetail
+│       └── model/            # ApiResponse, ProblemDetail, ProblemDetailError, ProblemTypes
 ├── response4j-spring/        # Spring Boot integration
 │   └── src/main/java/.../
 │       ├── autoconfigure/    # Response4jAutoConfiguration
