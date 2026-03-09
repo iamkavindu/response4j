@@ -15,9 +15,7 @@ import java.net.URI;
  */
 public final class ProblemTypes {
 
-    private ProblemTypes() {
-        // Prevent instantiation
-    }
+    private ProblemTypes() {}
 
     /**
      * Base URI for IANA-registered problem types.
