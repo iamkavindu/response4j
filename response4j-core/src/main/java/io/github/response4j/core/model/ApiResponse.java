@@ -135,10 +135,10 @@ public record ApiResponse<T>(
     }
 
     /**
-     * Creates an {@code ApiResponse} with the specified status and message, using an empty {@link Map} as the data.
+     * Creates an {@code ApiResponse} with the specified status and message, without a data payload.
      * <p>
      * The timestamp is automatically set to the current instant. This method is typically used for
-     * no-content responses (HTTP 204) where a payload is not expected but a consistent structure
+     * no-content responses (HTTP 204) where a payload is not expected but a consistent structure is required.
      * The data field is {@code null} for these responses; since {@code @JsonInclude(NON_NULL)}
      * is applied, the {@code data} field is omitted from the serialized JSON output.
      *
