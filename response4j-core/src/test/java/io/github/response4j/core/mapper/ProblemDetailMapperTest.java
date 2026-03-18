@@ -100,7 +100,7 @@ class ProblemDetailMapperTest {
         assertThat(pd.type()).isEqualTo(ProblemTypes.ABOUT_BLANK);
         assertThat(pd.status()).isEqualTo(404);
         assertThat(pd.title()).isEqualTo("Not Found");
-        assertThat(pd.detail()).isEmpty();
+        assertThat(pd.detail()).isNull();
         assertThat(pd.instance()).isEqualTo("/resource/42");
     }
 

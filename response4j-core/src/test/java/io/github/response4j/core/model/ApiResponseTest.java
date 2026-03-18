@@ -25,11 +25,10 @@ class ApiResponseTest {
     }
 
     @Test
-    void noContent_setsStatus204AndEmptyData() {
+    void noContent_setsStatus204AndNullData() {
         var response = ApiResponse.noContent();
         assertThat(response.status()).isEqualTo(204);
-        assertThat(response.data()).isInstanceOf(Map.class);
-        assertThat((Map<?, ?>) response.data()).isEmpty();
+        assertThat(response.data()).isNull();
     }
 
     @Test

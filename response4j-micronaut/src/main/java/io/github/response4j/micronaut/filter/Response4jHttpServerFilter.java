@@ -90,6 +90,6 @@ public class Response4jHttpServerFilter implements HttpServerFilter {
      */
     @Override
     public int getOrder() {
-        return HIGHEST_PRECEDENCE;
+        return HIGHEST_PRECEDENCE + 100;
     }
 }

@@ -7,7 +7,6 @@ import io.github.response4j.core.model.ProblemTypes;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * Maps {@link Throwable} instances to {@link ProblemDetail} RFC 9457 representations.
@@ -126,9 +125,14 @@ public class ProblemDetailMapper {
             title = annotation.title().isBlank() ? exception.getClass().getSimpleName() : annotation.title();
         }
 
-        String detail = annotation.detail().isBlank() && annotation.includeExceptionMessage()
-                ? Objects.requireNonNullElse(exception.getMessage(), "")
-                : annotation.detail();
+        String detail;
+        if (!annotation.detail().isBlank()) {
+            detail = annotation.detail();
+        } else if (annotation.includeExceptionMessage()) {
+            detail = exception.getMessage();
+        } else {
+            detail = null;
+        }
 
         // Extract extension members from @ProblemExtension annotations
         Map<String, Object> extensions = extractExtensions(exception);
@@ -168,7 +172,7 @@ public class ProblemDetailMapper {
                 .type(ProblemTypes.ABOUT_BLANK)
                 .status(status)
                 .title(httpReasonPhrase(status))
-                .detail(Objects.requireNonNullElse(exception.getMessage(), ""))
+                .detail(exception.getMessage())
                 .instance(instance)
                 .build();
     }

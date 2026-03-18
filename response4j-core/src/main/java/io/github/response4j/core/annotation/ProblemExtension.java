@@ -55,6 +55,11 @@ public @interface ProblemExtension {
      * The extension field value.
      * <p>
      * This will be serialized as a string in the problem detail response.
+     * <p>
+     * Note: Due to Java annotation constraints, this value is limited to {@link String} types.
+     * For non-string extension values (numbers, booleans, arrays, or nested objects), use the
+     * programmatic {@link io.github.response4j.core.model.ProblemDetail.Builder#extensions(java.util.Map)}
+     * API instead.
      *
      * @return the extension field value
      */

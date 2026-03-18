@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.github.response4j.core.annotation.SuccessResponse;
 import java.time.Instant;
-import java.util.Map;
 
 /**
  * Standardized envelope for successful API responses.
@@ -25,7 +24,7 @@ import java.util.Map;
  * @param status the HTTP status code (e.g., 200, 201, 204)
  * @param message human-readable response message describing the result
  * @param timestamp UTC timestamp in ISO-8601 format (yyyy-MM-dd'T'HH:mm:ss'Z') indicating when the response was created
- * @param data the response payload of type {@code T}; may be {@code null} or an empty {@link Map} for no-content responses
+ * @param data the response payload of type {@code T}; may be {@code null} for no-content responses
  * @see SuccessResponse
  * @see Builder
  */
@@ -34,7 +33,7 @@ public record ApiResponse<T>(
         int status,
         String message,
 
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
         Instant timestamp,
 
         T data) {
@@ -140,24 +139,20 @@ public record ApiResponse<T>(
      * <p>
      * The timestamp is automatically set to the current instant. This method is typically used for
      * no-content responses (HTTP 204) where a payload is not expected but a consistent structure
-     * is desired. The empty map is used instead of {@code null} to maintain a valid JSON structure.
-     * <p>
-     * The unchecked cast is safe because an empty map is compatible with any generic type {@code T}
-     * at runtime, and the map is immutable.
+     * The data field is {@code null} for these responses; since {@code @JsonInclude(NON_NULL)}
+     * is applied, the {@code data} field is omitted from the serialized JSON output.
      *
      * @param <T> the type of the response payload
      * @param status the HTTP status code (typically 204)
      * @param message the human-readable response message
-     * @return a new {@code ApiResponse} instance with an empty map as data
+     * @return a new {@code ApiResponse} instance with no data payload
      * @see #noContent()
      */
-    @SuppressWarnings("unchecked")
     public static <T> ApiResponse<T> empty(int status, String message) {
         return new ApiResponse.Builder<T>()
                 .status(status)
                 .message(message)
                 .timestamp(Instant.now())
-                .data((T) Map.of())
                 .build();
     }
 
@@ -189,15 +184,15 @@ public record ApiResponse<T>(
      * @see #of(int, String, Object)
      */
     public static <T> ApiResponse<T> created(T data) {
-        return of(201, "Request created successful", data);
+        return of(201, "Request created successfully", data);
     }
 
     /**
      * Creates an {@code ApiResponse} with HTTP status 204 No Content.
      * <p>
      * This is a convenience method for successful requests that do not return a payload
-     * (e.g., DELETE operations). The data field is set to an empty {@link Map} to maintain
-     * a consistent JSON structure, and the message is "No content".
+     * (e.g., DELETE operations). The data field is {@code null} and will be omitted from
+     * the JSON response; the message is "No content".
      *
      * @param <T> the type of the response payload (generic to maintain API consistency)
      * @return a new {@code ApiResponse} with status 204, empty data, and default no-content message

@@ -2,11 +2,11 @@ package io.github.response4j.spring.handler;
 
 import io.github.response4j.core.mapper.ProblemDetailMapper;
 import io.github.response4j.core.model.ProblemDetail;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.context.request.ServletWebRequest;
 
 /**
  * Global exception handler that produces RFC 9457 {@link ProblemDetail} responses for all exceptions.
@@ -42,8 +42,8 @@ public class Response4jExceptionHandler {
      * @return a response entity with the mapped ProblemDetail and appropriate status
      */
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ProblemDetail> handleException(ServletWebRequest request, Exception exception) {
-        String instance = request.toString();
+    public ResponseEntity<ProblemDetail> handleException(HttpServletRequest request, Exception exception) {
+        String instance = request.getRequestURI();
         ProblemDetail problemDetail = problemDetailMapper.map(exception, instance);
         return ResponseEntity.status(problemDetail.status())
                 .contentType(MediaType.APPLICATION_PROBLEM_JSON)
