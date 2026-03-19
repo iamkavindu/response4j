@@ -9,7 +9,7 @@
 
     <name>response4j</name>
     <description>A framework-agnostic Java library for standardized API error responses aligned with RFC 9457 Problem Details for HTTP APIs</description>
-    <url>https://github.com/iamkavindu/response4j</url>
+    <url>https://github.com/response4j/response4j</url>
 
     <licenses>
         <license>
@@ -28,9 +28,9 @@
     </developers>
 
     <scm>
-        <connection>scm:git:git://github.com/iamkavindu/response4j.git</connection>
-        <developerConnection>scm:git:ssh://github.com/iamkavindu/response4j.git</developerConnection>
-        <url>https://github.com/iamkavindu/response4j</url>
+        <connection>scm:git:git://github.com/response4j/response4j.git</connection>
+        <developerConnection>scm:git:ssh://github.com/response4j/response4j.git</developerConnection>
+        <url>https://github.com/response4j/response4j</url>
         <tag>HEAD</tag>
     </scm>
 
