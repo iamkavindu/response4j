@@ -1,12 +1,14 @@
 package io.github.response4j.core.model;
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import io.github.response4j.core.annotation.ProblemResponse;
-import io.github.response4j.core.mapper.ProblemDetailMapper;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+import io.github.response4j.core.annotation.ProblemResponse;
+import io.github.response4j.core.mapper.ProblemDetailMapper;
 
 /**
  * RFC 9457 Problem Details for HTTP APIs representation.
@@ -19,11 +21,12 @@ import java.util.Map;
  * optional instance identifier, and extensible additional properties. This record is
  * framework-agnostic and can be used with Spring Boot, Quarkus, Micronaut, or standalone.
  * <p>
- * Instances are typically created automatically by exception handlers when an exception
- * annotated with {@link ProblemResponse} is thrown,
- * or manually constructed via the {@link Builder} or {@link #of(String, int, String, String, Map)}
- * factory method. The {@link ProblemDetailMapper} handles
- * the mapping from exceptions to problem details.
+ * Instances are created automatically by exception handlers when an exception annotated
+ * with {@link ProblemResponse} is thrown. The {@link ProblemDetailMapper} handles the mapping
+ * from exceptions to problem details.
+ * <p>
+ * For advanced use cases — such as validation failures with multiple field-level errors — the
+ * {@link Builder} and {@link #of(String, int, String, String, Map)} factory method are also available.
  * <p>
  * JSON serialization is handled by Jackson annotations. The {@code extensions} map is flattened
  * into the JSON output using {@link JsonAnyGetter}, allowing problem-specific extension members
