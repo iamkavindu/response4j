@@ -92,7 +92,7 @@ mvn clean install
 
 ### Spring Boot
 
-With `response4j-spring` on the classpath, beans are auto-configured. No extra setup required. Auto-configuration only activates in a servlet web application context (`@ConditionalOnWebApplication`). All registered beans (`ApiResponseMapper`, `ProblemDetailMapper`, `Response4jExceptionHandler`, `Response4jResponseBodyAdvice`) are conditional on `@ConditionalOnMissingBean`, so any of them can be replaced by declaring your own bean of the same type.
+With `response4j-spring` on the classpath, beans are auto-configured. No extra setup required. Auto-configuration only activates in a web application context (`@ConditionalOnWebApplication`). All registered beans (`ApiResponseMapper`, `ProblemDetailMapper`, `Response4jExceptionHandler`, `Response4jResponseBodyAdvice`) are conditional on `@ConditionalOnMissingBean`, so any of them can be replaced by declaring your own bean of the same type.
 
 #### Success responses
 
@@ -156,7 +156,7 @@ public class ValidationException extends RuntimeException {
 }
 ```
 
-Unhandled exceptions produce `Content-Type: application/problem+json` with status 500 when not annotated:
+The example above (`UserNotFoundException`) produces the following response:
 
 ```json
 {
@@ -164,6 +164,17 @@ Unhandled exceptions produce `Content-Type: application/problem+json` with statu
   "title": "User Not Found",
   "status": 404,
   "detail": "User with id 42 was not found"
+}
+```
+
+Unannotated exceptions produce `Content-Type: application/problem+json` with status 500:
+
+```json
+{
+  "type": "about:blank",
+  "title": "Internal Server Error",
+  "status": 500,
+  "detail": "An unexpected error occurred"
 }
 ```
 
@@ -352,13 +363,13 @@ ProblemDetail validation = ProblemDetail.ofErrors(
 
 Factory methods:
 
-| Method                      | Status | Default message                |
-|-----------------------------|--------|--------------------------------|
-| `of(status, message, data)` | custom | custom                         |
-| `empty(status, message)`    | custom | custom (data is `{}`)          |
-| `ok(data)`                  | `200`  | `"Request successful"`         |
-| `created(data)`             | `201`  | `"Request created successful"` |
-| `noContent()`               | `204`  | `"No content"` (data is `{}`)  |
+| Method                      | Status | Default message                      |
+|-----------------------------|--------|--------------------------------------|
+| `of(status, message, data)` | custom | custom                               |
+| `empty(status, message)`    | custom | custom (no `data` field in response) |
+| `ok(data)`                  | `200`  | `"Request successful"`               |
+| `created(data)`             | `201`  | `"Request created successfully"`     |
+| `noContent()`               | `204`  | `"No content"` (no `data` field)     |
 
 Use `ApiResponse.Builder<T>` for full field control:
 
