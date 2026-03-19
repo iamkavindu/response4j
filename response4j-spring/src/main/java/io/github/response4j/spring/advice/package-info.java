@@ -7,8 +7,7 @@
  * {@link io.github.response4j.core.annotation.SuccessResponse}, the advice delegates to
  * {@link io.github.response4j.core.mapper.ApiResponseMapper} to wrap the value in an
  * {@link io.github.response4j.core.model.ApiResponse} envelope. When {@code wrap = false} is set
- * on the annotation, or when the return value is already an {@code ApiResponse}, the body is
- * passed through unchanged.
+ * on the annotation, the body is passed through unchanged.
  *
  * <p>The advice is registered automatically by
  * {@link io.github.response4j.spring.autoconfigure.Response4jAutoConfiguration} and requires no

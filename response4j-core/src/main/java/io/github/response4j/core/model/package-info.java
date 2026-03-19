@@ -6,10 +6,9 @@
  * <ul>
  *   <li>{@link io.github.response4j.core.model.ApiResponse} — An immutable record that wraps a
  *       successful HTTP response payload in a consistent envelope containing an HTTP status code,
- *       a human-readable message, a UTC timestamp, and the typed payload. Static factory methods
- *       ({@code ok}, {@code created}, {@code noContent}) cover the most common HTTP success codes;
- *       a fluent {@link io.github.response4j.core.model.ApiResponse.Builder Builder} is available
- *       for custom cases.
+ *       a human-readable message, a UTC timestamp, and the typed payload. Instances are created
+ *       internally by the library when a controller method or class is annotated with
+ *       {@link io.github.response4j.core.annotation.SuccessResponse}.
  *   <li>{@link io.github.response4j.core.model.ProblemDetail} — An immutable record that
  *       represents an HTTP error response conforming to
  *       <a href="https://www.rfc-editor.org/rfc/rfc9457">RFC 9457 Problem Details for HTTP APIs</a>.

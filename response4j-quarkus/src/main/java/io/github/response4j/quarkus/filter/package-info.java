@@ -8,10 +8,9 @@
  * delegates to {@link io.github.response4j.core.mapper.ApiResponseMapper} to replace the entity
  * with an {@link io.github.response4j.core.model.ApiResponse} envelope before serialization.
  *
- * <p>When {@code wrap = false} is set on the annotation, or when the entity is already an
- * {@code ApiResponse}, the response is passed through unchanged. The filter inspects the
- * {@code ResourceInfo} provided by JAX-RS to locate the annotation on the method first, then
- * falls back to the class level.
+ * <p>When {@code wrap = false} is set on the annotation, the body is passed through unchanged.
+ * The filter inspects the {@code ResourceInfo} provided by JAX-RS to locate the annotation on
+ * the method first, then falls back to the class level.
  *
  * @see io.github.response4j.core.annotation.SuccessResponse
  * @see io.github.response4j.core.model.ApiResponse

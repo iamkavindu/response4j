@@ -307,25 +307,9 @@ The `pointer` field can be a JSON Pointer (RFC 6901) like `/email` or `/user/pro
 
 ### Core (framework-agnostic)
 
-Use `response4j-core` without Spring for manual mapping and serialization:
+Use `response4j-core` without a framework module to work with `ProblemDetail` directly:
 
 ```java
-// Success response
-ApiResponse<User> ok = ApiResponse.ok(user);
-ApiResponse<User> created = ApiResponse.created(user);
-ApiResponse<?> noContent = ApiResponse.noContent();
-
-// Custom response
-ApiResponse<Order> custom = ApiResponse.of(200, "Order processed", order);
-
-// Using ApiResponse.Builder for full control
-ApiResponse<User> response = new ApiResponse.Builder<User>()
-    .status(200)
-    .message("User retrieved")
-    .timestamp(Instant.now())
-    .data(user)
-    .build();
-
 // Problem details
 ProblemDetail problem = ProblemDetail.of("Not Found", 404, "Resource not found", null, null);
 
@@ -360,27 +344,6 @@ ProblemDetail validation = ProblemDetail.ofErrors(
 | `message`   | `String`  | Human-readable message   |
 | `timestamp` | `Instant` | UTC timestamp (ISO-8601) |
 | `data`      | `T`       | Optional payload         |
-
-Factory methods:
-
-| Method                      | Status | Default message                      |
-|-----------------------------|--------|--------------------------------------|
-| `of(status, message, data)` | custom | custom                               |
-| `empty(status, message)`    | custom | custom (no `data` field in response) |
-| `ok(data)`                  | `200`  | `"Request successful"`               |
-| `created(data)`             | `201`  | `"Request created successfully"`     |
-| `noContent()`               | `204`  | `"No content"` (no `data` field)     |
-
-Use `ApiResponse.Builder<T>` for full field control:
-
-```java
-ApiResponse<User> response = new ApiResponse.Builder<User>()
-    .status(200)
-    .message("User retrieved")
-    .timestamp(Instant.now())
-    .data(user)
-    .build();
-```
 
 ### `ProblemDetail`
 
@@ -431,7 +394,7 @@ Maps controller return values to `ApiResponse` instances. Used internally by all
 
 | Method                  | Description                                                                                                                                                                                                                                |
 |-------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `map(data, annotation)` | Maps `data` using `@SuccessResponse` annotation settings. Returns `null` when `wrap = false`, signalling the framework to pass the original body through unchanged. Falls back to `ok(data)` or `noContent()` when `annotation` is `null`. |
+| `map(data, annotation)` | Maps `data` using `@SuccessResponse` annotation settings. Returns `null` when `wrap = false`, signalling the framework to pass the original body through unchanged. Falls back to 200 OK for non-null data or 204 No Content for `null` data when `annotation` is `null`. |
 
 ### `ProblemDetailMapper`
 

@@ -9,9 +9,9 @@
  * body in an {@link io.github.response4j.core.model.ApiResponse} envelope before it is written to
  * the client.
  *
- * <p>When {@code wrap = false} is set on the annotation, or when the body is already an
- * {@code ApiResponse}, the response is passed through unchanged. The filter operates in the
- * reactive pipeline using Micronaut's {@code Publisher}-based filter chain.
+ * <p>When {@code wrap = false} is set on the annotation, the body is passed through unchanged.
+ * The filter operates in the reactive pipeline using Micronaut's {@code Publisher}-based filter
+ * chain.
  *
  * <p>The filter is guarded by {@code @Requires(classes = {BasicHttpAttributes.class})}, which
  * means it is only registered when {@code io.micronaut.http.BasicHttpAttributes} is present on
