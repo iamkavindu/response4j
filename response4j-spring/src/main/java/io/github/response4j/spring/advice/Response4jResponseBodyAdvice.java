@@ -1,8 +1,5 @@
 package io.github.response4j.spring.advice;
 
-import io.github.response4j.core.annotation.SuccessResponse;
-import io.github.response4j.core.mapper.ApiResponseMapper;
-import io.github.response4j.core.model.ApiResponse;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
@@ -13,6 +10,10 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
+
+import io.github.response4j.core.annotation.SuccessResponse;
+import io.github.response4j.core.mapper.ApiResponseMapper;
+import io.github.response4j.core.model.ApiResponse;
 
 /**
  * Spring {@link ResponseBodyAdvice} that wraps controller responses in {@link ApiResponse} when
@@ -70,14 +71,6 @@ public class Response4jResponseBodyAdvice implements ResponseBodyAdvice<Object> 
             @NonNull Class<? extends HttpMessageConverter<?>> selectedConverterType,
             @NonNull ServerHttpRequest request,
             @NonNull ServerHttpResponse response) {
-
-        if (body instanceof ApiResponse<?> apiResponseBody) {
-            if (apiResponseBody.status() == 204) {
-                response.setStatusCode(HttpStatusCode.valueOf(204));
-                return null;
-            }
-            return body;
-        }
 
         SuccessResponse annotation = returnType.getMethodAnnotation(SuccessResponse.class);
         if (annotation == null) {

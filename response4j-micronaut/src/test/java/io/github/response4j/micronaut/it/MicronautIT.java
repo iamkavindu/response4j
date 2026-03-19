@@ -3,6 +3,7 @@ package io.github.response4j.micronaut.it;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
 
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpStatus;
@@ -12,7 +13,6 @@ import io.micronaut.http.client.annotation.Client;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
-import org.junit.jupiter.api.Test;
 
 @MicronautTest
 class MicronautIT {
@@ -43,15 +43,6 @@ class MicronautIT {
         var response = client.toBlocking()
                 .exchange(
                         HttpRequest.GET("/test/success/wrap-false").accept(MediaType.APPLICATION_JSON_TYPE),
-                        String.class);
-        assertEquals(HttpStatus.OK, response.getStatus());
-    }
-
-    @Test
-    void alreadyWrappedApiResponse_isPassedThrough() {
-        var response = client.toBlocking()
-                .exchange(
-                        HttpRequest.GET("/test/success/already-wrapped").accept(MediaType.APPLICATION_JSON_TYPE),
                         String.class);
         assertEquals(HttpStatus.OK, response.getStatus());
     }

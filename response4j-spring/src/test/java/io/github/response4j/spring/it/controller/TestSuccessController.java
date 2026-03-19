@@ -1,12 +1,12 @@
 package io.github.response4j.spring.it.controller;
 
-import io.github.response4j.core.annotation.SuccessResponse;
-import io.github.response4j.core.model.ApiResponse;
 import java.util.Map;
-import org.springframework.http.ResponseEntity;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import io.github.response4j.core.annotation.SuccessResponse;
 
 /**
  * Test-only controller that exercises response4j success wrapping
@@ -38,12 +38,5 @@ public class TestSuccessController {
     @SuccessResponse(status = 204, message = "No Content")
     public void noContent() {
         // Intentionally empty; ResponseBodyAdvice should set 204 and omit body.
-    }
-
-    @GetMapping("/already-wrapped")
-    @SuccessResponse(status = 200, message = "Ignored")
-    public ResponseEntity<ApiResponse<String>> alreadyWrapped() {
-        ApiResponse<String> body = ApiResponse.ok("wrapped");
-        return ResponseEntity.ok(body);
     }
 }

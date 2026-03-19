@@ -1,5 +1,7 @@
 package io.github.response4j.micronaut.filter;
 
+import org.reactivestreams.Publisher;
+
 import io.github.response4j.core.annotation.SuccessResponse;
 import io.github.response4j.core.mapper.ApiResponseMapper;
 import io.github.response4j.core.model.ApiResponse;
@@ -12,7 +14,6 @@ import io.micronaut.http.filter.HttpServerFilter;
 import io.micronaut.http.filter.ServerFilterChain;
 import io.micronaut.web.router.RouteMatch;
 import jakarta.inject.Inject;
-import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
 /**
@@ -53,10 +54,6 @@ public class Response4jHttpServerFilter implements HttpServerFilter {
 
     @SuppressWarnings("unchecked")
     private MutableHttpResponse<?> wrapIfRequired(HttpRequest<?> request, MutableHttpResponse<?> response) {
-
-        if (response.getBody().orElse(null) instanceof ApiResponse<?>) {
-            return response;
-        }
 
         RouteMatch<?> routeMatch =
                 (RouteMatch<?>) BasicHttpAttributes.getRouteMatchInfo(request).orElse(null);

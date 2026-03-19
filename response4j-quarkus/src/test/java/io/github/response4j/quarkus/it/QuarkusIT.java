@@ -1,13 +1,13 @@
 package io.github.response4j.quarkus.it;
 
-import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.junit.QuarkusTest;
-import org.junit.jupiter.api.Test;
+import static io.restassured.RestAssured.given;
 
 @QuarkusTest
 class QuarkusIT {
@@ -45,17 +45,6 @@ class QuarkusIT {
                 .body("wrapped", equalTo(false))
                 .body("status", nullValue())
                 .body("message", nullValue());
-    }
-
-    @Test
-    void alreadyWrappedApiResponse_isPassedThrough() {
-        given().when()
-                .get("/test/success/already-wrapped")
-                .then()
-                .statusCode(200)
-                .body("status", equalTo(200))
-                .body("message", equalTo("Request successful"))
-                .body("data", equalTo("wrapped"));
     }
 
     @Test

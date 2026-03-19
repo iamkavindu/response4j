@@ -1,5 +1,7 @@
 package io.github.response4j.quarkus.filter;
 
+import java.lang.reflect.Method;
+
 import io.github.response4j.core.annotation.SuccessResponse;
 import io.github.response4j.core.mapper.ApiResponseMapper;
 import io.github.response4j.core.model.ApiResponse;
@@ -11,7 +13,6 @@ import jakarta.ws.rs.container.ContainerResponseFilter;
 import jakarta.ws.rs.container.ResourceInfo;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.ext.Provider;
-import java.lang.reflect.Method;
 
 /**
  * JAX-RS {@link ContainerResponseFilter} that wraps resource method responses in
@@ -51,8 +52,6 @@ public class Response4jContainerResponseFilter implements ContainerResponseFilte
 
         Method resourceMethod = resourceInfo.getResourceMethod();
         if (resourceMethod == null) return;
-
-        if (responseContext.getEntity() instanceof ApiResponse<?>) return;
 
         SuccessResponse annotation = resourceMethod.getAnnotation(SuccessResponse.class);
         if (annotation == null) {
