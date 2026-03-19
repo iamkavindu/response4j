@@ -1,13 +1,9 @@
 /**
- * Core annotations that drive response4j behaviour at the method, type, and exception level.
+ * Core annotations that drive response4j behaviour at the exception level.
  *
  * <p>This package contains three annotation types:
  *
  * <ul>
- *   <li>{@link io.github.response4j.core.annotation.SuccessResponse} — Applied to a controller
- *       method or class to instruct framework integration modules to wrap the return value in a
- *       standardized {@link io.github.response4j.core.model.ApiResponse} envelope. Attributes
- *       control the HTTP status code, human-readable message, and whether wrapping is active.
  *   <li>{@link io.github.response4j.core.annotation.ProblemResponse} — Applied to an exception
  *       class to declare its RFC 9457 mapping. When an annotated exception is thrown, the
  *       framework integration converts it to a

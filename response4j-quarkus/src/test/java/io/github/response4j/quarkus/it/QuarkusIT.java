@@ -2,8 +2,6 @@ package io.github.response4j.quarkus.it;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
 import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.junit.QuarkusTest;
@@ -11,41 +9,6 @@ import static io.restassured.RestAssured.given;
 
 @QuarkusTest
 class QuarkusIT {
-
-    @Test
-    void methodLevelSuccessResponse_isWrappedWithApiResponse() {
-        given().when()
-                .get("/test/success/method")
-                .then()
-                .statusCode(200)
-                .contentType(containsString("application/json"))
-                .body("status", equalTo(200))
-                .body("message", equalTo("Method level OK"))
-                .body("timestamp", notNullValue())
-                .body("data.value", equalTo("method"));
-    }
-
-    @Test
-    void classLevelSuccessResponse_usesClassAnnotation() {
-        given().when()
-                .get("/test/success/class")
-                .then()
-                .statusCode(201)
-                .body("status", equalTo(201))
-                .body("message", equalTo("Class level created"))
-                .body("data.value", equalTo("class"));
-    }
-
-    @Test
-    void wrapFalse_returnsRawBodyWithoutEnvelope() {
-        given().when()
-                .get("/test/success/wrap-false")
-                .then()
-                .statusCode(200)
-                .body("wrapped", equalTo(false))
-                .body("status", nullValue())
-                .body("message", nullValue());
-    }
 
     @Test
     void annotatedException_isMappedToProblemDetail() {

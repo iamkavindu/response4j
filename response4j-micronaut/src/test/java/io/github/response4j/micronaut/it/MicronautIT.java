@@ -2,7 +2,6 @@ package io.github.response4j.micronaut.it;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 
 import io.micronaut.http.HttpRequest;
@@ -20,32 +19,6 @@ class MicronautIT {
     @Inject
     @Client("/")
     HttpClient client;
-
-    @Test
-    void methodLevelSuccessResponse_isWrappedWithApiResponse() {
-        var response = client.toBlocking()
-                .exchange(
-                        HttpRequest.GET("/test/success/method").accept(MediaType.APPLICATION_JSON_TYPE), String.class);
-        assertEquals(HttpStatus.OK, response.getStatus());
-        assertTrue(response.getContentType().isPresent());
-        assertTrue(response.getContentType().get().toString().contains("application/json"));
-    }
-
-    @Test
-    void classLevelSuccessResponse_usesClassAnnotation() {
-        var response = client.toBlocking()
-                .exchange(HttpRequest.GET("/test/success/class").accept(MediaType.APPLICATION_JSON_TYPE), String.class);
-        assertEquals(HttpStatus.CREATED, response.getStatus());
-    }
-
-    @Test
-    void wrapFalse_returnsRawBodyWithoutEnvelope() {
-        var response = client.toBlocking()
-                .exchange(
-                        HttpRequest.GET("/test/success/wrap-false").accept(MediaType.APPLICATION_JSON_TYPE),
-                        String.class);
-        assertEquals(HttpStatus.OK, response.getStatus());
-    }
 
     @Test
     void annotatedException_isMappedToProblemDetail() {

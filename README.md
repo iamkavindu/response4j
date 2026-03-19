@@ -7,12 +7,12 @@ A framework-agnostic Java library for standardized API success and error respons
 
 - **RFC 9457 compliant** — Error responses follow the Problem Details specification
 - **Immutable records** — Core models use Java Records for thread-safe, immutable data structures
-- **Framework-agnostic core** — Use `response4j-core` with any Java web framework
+- **Framework-agnostic core** — Use `response4j-core` with any Java application, with or without a web framework
 - **Spring Boot support** — Optional `response4j-spring` module with auto-configuration
 - **Quarkus support** — Optional `response4j-quarkus` module with CDI producers and JAX-RS integration
-- **Micronaut support** — Optional `response4j-micronaut` module with bean factory, HTTP filter, and exception handler
-- **Simple annotations** — `@SuccessResponse` for success wrapping, `@ProblemResponse` for exception mapping
-- **Consistent structure** — Success and error responses share predictable JSON shapes
+- **Micronaut support** — Optional `response4j-micronaut` module with bean factory and exception handler
+- **Simple annotations** — `@ProblemResponse` for automatic exception mapping
+- **Consistent error structure** — All error responses share a predictable RFC 9457 JSON shape
 
 ## Requirements
 
@@ -92,49 +92,7 @@ mvn clean install
 
 ### Spring Boot
 
-With `response4j-spring` on the classpath, beans are auto-configured. No extra setup required. Auto-configuration only activates in a web application context (`@ConditionalOnWebApplication`). All registered beans (`ApiResponseMapper`, `ProblemDetailMapper`, `Response4jExceptionHandler`, `Response4jResponseBodyAdvice`) are conditional on `@ConditionalOnMissingBean`, so any of them can be replaced by declaring your own bean of the same type.
-
-#### Success responses
-
-Annotate controller methods or classes with `@SuccessResponse` to wrap return values in a consistent structure:
-
-```java
-@RestController
-@SuccessResponse  // Applies to all methods in this controller
-public class UserController {
-
-    @GetMapping("/users/{id}")
-    public User getUser(@PathVariable Long id) {
-        return userService.findById(id);
-    }
-
-    @PostMapping("/users")
-    @SuccessResponse(status = 201, message = "User created successfully")
-    public User createUser(@RequestBody UserRequest request) {
-        return userService.create(request);
-    }
-
-    @GetMapping("/health")
-    @SuccessResponse(wrap = false)
-    public Map<String, String> health() {
-        return Map.of("status", "UP");
-    }
-}
-```
-
-Example success response:
-
-```json
-{
-  "status": 200,
-  "message": "Request successful",
-  "timestamp": "2024-01-15T10:30:00Z",
-  "data": {
-    "id": 1,
-    "name": "John Doe"
-  }
-}
-```
+With `response4j-spring` on the classpath, beans are auto-configured. No extra setup required. Auto-configuration only activates in a web application context (`@ConditionalOnWebApplication`). The registered beans (`ProblemDetailMapper`, `Response4jExceptionHandler`) are conditional on `@ConditionalOnMissingBean`, so either can be replaced by declaring your own bean of the same type.
 
 #### Error responses
 
@@ -209,13 +167,12 @@ Extension fields appear as top-level properties in the JSON response:
 
 ### Quarkus
 
-With `response4j-quarkus` on the classpath, CDI beans (`ApiResponseMapper`, `ProblemDetailMapper`) are auto-produced. A JAX-RS `ExceptionMapper` and `ContainerResponseFilter` handle exception mapping and `@SuccessResponse` wrapping respectively.
+With `response4j-quarkus` on the classpath, a CDI bean (`ProblemDetailMapper`) is auto-produced. A JAX-RS `ExceptionMapper` handles exception mapping automatically.
 
-Annotate resource methods or classes with `@SuccessResponse` and exception classes with `@ProblemResponse` (with optional `@ProblemExtension`) the same way as with Spring Boot:
+Annotate exception classes with `@ProblemResponse` (with optional `@ProblemExtension`) the same way as with Spring Boot:
 
 ```java
 @Path("/users")
-@SuccessResponse
 public class UserResource {
 
     @GET
@@ -223,35 +180,22 @@ public class UserResource {
     public User getUser(@PathParam("id") Long id) {
         return userService.findById(id);
     }
-
-    @POST
-    @SuccessResponse(status = 201, message = "User created successfully")
-    public User createUser(UserRequest request) {
-        return userService.create(request);
-    }
 }
 ```
 
 ### Micronaut
 
-With `response4j-micronaut` on the classpath, a bean factory auto-registers `ApiResponseMapper` and `ProblemDetailMapper` when Micronaut HTTP is present. `Response4jHttpServerFilter` applies `@SuccessResponse` wrapping to controller responses, and `Response4jExceptionHandler` maps exceptions to RFC 9457 Problem Details.
+With `response4j-micronaut` on the classpath, a bean factory auto-registers `ProblemDetailMapper` when Micronaut HTTP is present. `Response4jExceptionHandler` maps exceptions to RFC 9457 Problem Details automatically.
 
-Annotate controller methods or classes with `@SuccessResponse` and exception classes with `@ProblemResponse` (with optional `@ProblemExtension`) the same way as with Spring Boot or Quarkus:
+Annotate exception classes with `@ProblemResponse` (with optional `@ProblemExtension`) the same way as with Spring Boot or Quarkus:
 
 ```java
 @Controller("/users")
-@SuccessResponse
 public class UserController {
 
     @Get("/{id}")
     public User getUser(@PathVariable Long id) {
         return userService.findById(id);
-    }
-
-    @Post
-    @SuccessResponse(status = 201, message = "User created successfully")
-    public User createUser(@Body UserRequest request) {
-        return userService.create(request);
     }
 }
 ```
@@ -307,10 +251,15 @@ The `pointer` field can be a JSON Pointer (RFC 6901) like `/email` or `/user/pro
 
 ### Core (framework-agnostic)
 
-Use `response4j-core` without a framework module to work with `ProblemDetail` directly:
+Use `response4j-core` without any framework. `ProblemDetailMapper` can be called directly anywhere:
 
 ```java
-// Problem details
+ProblemDetailMapper mapper = new ProblemDetailMapper();
+
+// Annotated exception — mapping driven by @ProblemResponse on the exception class
+ProblemDetail problem = mapper.map(exception, "/api/users/42");
+
+// Or construct manually for advanced use cases
 ProblemDetail problem = ProblemDetail.of("Not Found", 404, "Resource not found", null, null);
 
 // Using ProblemDetail.Builder for full control
@@ -336,14 +285,6 @@ ProblemDetail validation = ProblemDetail.ofErrors(
 
 ## API Reference
 
-### `ApiResponse<T>`
-
-| Field       | Type      | Description              |
-|-------------|-----------|--------------------------|
-| `status`    | `int`     | HTTP status code         |
-| `message`   | `String`  | Human-readable message   |
-| `timestamp` | `Instant` | UTC timestamp (ISO-8601) |
-| `data`      | `T`       | Optional payload         |
 
 ### `ProblemDetail`
 
@@ -388,17 +329,9 @@ Utility class providing constants for well-known problem type URIs:
 | `ABOUT_BLANK` | `URI.create("about:blank")`                             | Indicates no specific problem type documentation   |
 | `IANA_BASE`   | `"https://iana.org/assignments/http-problem-types#"`    | Base URI for IANA-registered problem types         |
 
-### `ApiResponseMapper`
-
-Maps controller return values to `ApiResponse` instances. Used internally by all framework integration modules.
-
-| Method                  | Description                                                                                                                                                                                                                                |
-|-------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `map(data, annotation)` | Maps `data` using `@SuccessResponse` annotation settings. Returns `null` when `wrap = false`, signalling the framework to pass the original body through unchanged. Falls back to 200 OK for non-null data or 204 No Content for `null` data when `annotation` is `null`. |
-
 ### `ProblemDetailMapper`
 
-Maps `Throwable` instances to RFC 9457 `ProblemDetail`. Used internally by all framework integration modules.
+Maps `Throwable` instances to RFC 9457 `ProblemDetail`. Used by all framework integration modules and directly in standalone applications.
 
 | Method                     | Description                                                         |
 |----------------------------|---------------------------------------------------------------------|
@@ -406,14 +339,6 @@ Maps `Throwable` instances to RFC 9457 `ProblemDetail`. Used internally by all f
 | `map(exception, instance)` | Maps `exception` with an instance URI (typically the request path). |
 
 When the exception class is annotated with `@ProblemResponse`, annotation values are used. Blank `title` falls back to the exception class simple name. When `type` is `about:blank` and `title` is blank, `title` is replaced with the HTTP reason phrase per RFC 9457 Section 4.2.1. Unannotated exceptions produce a `500 Internal Server Error` response with `type: about:blank`, `title: "Internal Server Error"`, and the exception message used as the `detail` field.
-
-### `@SuccessResponse`
-
-| Attribute | Default                | Description                                          |
-|-----------|------------------------|------------------------------------------------------|
-| `status`  | `200`                  | HTTP status code                                     |
-| `message` | `"Request successful"` | Message in the response                              |
-| `wrap`    | `true`                 | Wrap in `ApiResponse`; if `false`, return body as-is |
 
 ### `@ProblemResponse`
 
@@ -440,23 +365,20 @@ When the exception class is annotated with `@ProblemResponse`, annotation values
 response4j/
 ├── response4j-core/          # Framework-agnostic core
 │   └── src/main/java/.../
-│       ├── annotation/       # @SuccessResponse, @ProblemResponse, @ProblemExtension, @ProblemExtensions
-│       ├── mapper/           # ApiResponseMapper, ProblemDetailMapper
-│       └── model/            # ApiResponse, ProblemDetail, ProblemDetailError, ProblemTypes
+│       ├── annotation/       # @ProblemResponse, @ProblemExtension, @ProblemExtensions
+│       ├── mapper/           # ProblemDetailMapper
+│       └── model/            # ProblemDetail, ProblemDetailError, ProblemTypes
 ├── response4j-spring/        # Spring Boot integration
 │   └── src/main/java/.../
 │       ├── autoconfigure/    # Response4jAutoConfiguration
-│       ├── advice/           # Response4jResponseBodyAdvice
 │       └── handler/          # Response4jExceptionHandler
 ├── response4j-quarkus/       # Quarkus integration
 │   └── src/main/java/.../
 │       ├── producer/         # Response4jProducer (CDI)
-│       ├── mapper/           # Response4jExceptionMapper
-│       └── filter/           # Response4jContainerResponseFilter
+│       └── mapper/           # Response4jExceptionMapper
 ├── response4j-micronaut/     # Micronaut integration
 │   └── src/main/java/.../
 │       ├── factory/          # Response4jFactory (beans)
-│       ├── filter/           # Response4jHttpServerFilter
 │       └── handler/          # Response4jExceptionHandler
 └── pom.xml
 ```

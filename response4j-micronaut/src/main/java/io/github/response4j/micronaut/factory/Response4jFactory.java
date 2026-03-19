@@ -1,6 +1,5 @@
 package io.github.response4j.micronaut.factory;
 
-import io.github.response4j.core.mapper.ApiResponseMapper;
 import io.github.response4j.core.mapper.ProblemDetailMapper;
 import io.micronaut.context.annotation.Bean;
 import io.micronaut.context.annotation.Factory;
@@ -10,14 +9,14 @@ import io.micronaut.http.HttpRequest;
 
 /**
  * Micronaut {@link io.micronaut.context.annotation.Factory} that provides
- * {@link ProblemDetailMapper} and {@link ApiResponseMapper} as beans for Micronaut HTTP applications.
+ * {@link ProblemDetailMapper} as a bean for Micronaut HTTP applications.
  */
 @Factory
 @Requires(classes = {HttpRequest.class})
 public class Response4jFactory {
 
     /**
-     * Produces a {@link ProblemDetailMapper} for exception-to-RFC-7807 mapping.
+     * Produces a {@link ProblemDetailMapper} for exception-to-RFC-9457 mapping.
      *
      * @return the problem detail mapper instance
      */
@@ -25,16 +24,5 @@ public class Response4jFactory {
     @Primary
     public ProblemDetailMapper problemDetailMapper() {
         return new ProblemDetailMapper();
-    }
-
-    /**
-     * Produces an {@link ApiResponseMapper} for wrapping success responses.
-     *
-     * @return the API response mapper instance
-     */
-    @Bean
-    @Primary
-    public ApiResponseMapper apiResponseMapper() {
-        return new ApiResponseMapper();
     }
 }
