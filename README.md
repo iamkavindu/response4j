@@ -88,6 +88,41 @@ cd response4j
 mvn clean install
 ```
 
+## Testing
+
+### Unit Tests
+
+Unit tests use [Maven Surefire](https://maven.apache.org/surefire/maven-surefire-plugin/) and follow the `*Test.java` naming convention. Run them across all modules with:
+
+```bash
+mvn test
+```
+
+To run unit tests for a specific module:
+
+```bash
+mvn test -pl response4j-core
+mvn test -pl response4j-spring
+mvn test -pl response4j-quarkus
+mvn test -pl response4j-micronaut
+```
+
+### Integration Tests
+
+Integration tests use [Maven Failsafe](https://maven.apache.org/surefire/maven-failsafe-plugin/) and follow the `*IT.java` naming convention. They spin up a real application context and verify end-to-end behaviour. Run them (along with unit tests) with:
+
+```bash
+mvn verify
+```
+
+To run integration tests for a specific module:
+
+```bash
+mvn verify -pl response4j-spring
+mvn verify -pl response4j-quarkus
+mvn verify -pl response4j-micronaut
+```
+
 ## Usage
 
 ### Spring Boot
