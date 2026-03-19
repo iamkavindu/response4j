@@ -13,6 +13,11 @@
  * {@code ApiResponse}, the response is passed through unchanged. The filter operates in the
  * reactive pipeline using Micronaut's {@code Publisher}-based filter chain.
  *
+ * <p>The filter is guarded by {@code @Requires(classes = {BasicHttpAttributes.class})}, which
+ * means it is only registered when {@code io.micronaut.http.BasicHttpAttributes} is present on
+ * the classpath. That class was introduced in Micronaut 4.8.0; on earlier Micronaut 4.x versions
+ * the filter bean is silently skipped and success-response wrapping will not occur.
+ *
  * @see io.github.response4j.core.annotation.SuccessResponse
  * @see io.github.response4j.core.model.ApiResponse
  * @see io.github.response4j.micronaut.factory

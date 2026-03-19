@@ -3,6 +3,7 @@ package io.github.response4j.micronaut.filter;
 import io.github.response4j.core.annotation.SuccessResponse;
 import io.github.response4j.core.mapper.ApiResponseMapper;
 import io.github.response4j.core.model.ApiResponse;
+import io.micronaut.context.annotation.Requires;
 import io.micronaut.http.BasicHttpAttributes;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.MutableHttpResponse;
@@ -22,6 +23,7 @@ import reactor.core.publisher.Flux;
  * is absent or the route match is unknown, leaves the response unchanged.
  */
 @Filter("/**")
+@Requires(classes = {BasicHttpAttributes.class})
 public class Response4jHttpServerFilter implements HttpServerFilter {
 
     private final ApiResponseMapper apiResponseMapper;
@@ -84,7 +86,7 @@ public class Response4jHttpServerFilter implements HttpServerFilter {
     }
 
     /**
-     * Returns {@link #HIGHEST_PRECEDENCE} so this filter runs first in the chain.
+     * Returns {@link #HIGHEST_PRECEDENCE} + 100 so this filter runs first in the chain.
      *
      * @return the filter order
      */

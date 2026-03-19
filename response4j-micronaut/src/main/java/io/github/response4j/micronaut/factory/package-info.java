@@ -2,8 +2,8 @@
  * Micronaut {@code @Factory} that provides response4j mapper beans for dependency injection.
  *
  * <p>{@link io.github.response4j.micronaut.factory.Response4jFactory} is a Micronaut
- * {@code @Factory} class that instantiates and exposes the two core mapper singletons as
- * injectable {@code @Singleton} beans:
+ * {@code @Factory} class that instantiates and exposes the two core mapper beans via
+ * {@code @Bean @Primary} producer methods:
  *
  * <ul>
  *   <li>{@link io.github.response4j.core.mapper.ApiResponseMapper} — consumed by

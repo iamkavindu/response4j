@@ -23,7 +23,7 @@ import java.time.Instant;
  * @param <T> the type of the response payload
  * @param status the HTTP status code (e.g., 200, 201, 204)
  * @param message human-readable response message describing the result
- * @param timestamp UTC timestamp in ISO-8601 format (yyyy-MM-dd'T'HH:mm:ss'Z') indicating when the response was created
+ * @param timestamp UTC timestamp in ISO-8601 format (yyyy-MM-dd'T'HH:mm:ss.SSS'Z') indicating when the response was created
  * @param data the response payload of type {@code T}; may be {@code null} for no-content responses
  * @see SuccessResponse
  * @see Builder
@@ -175,7 +175,7 @@ public record ApiResponse<T>(
      * Creates a successful {@code ApiResponse} with HTTP status 201 Created.
      * <p>
      * This is a convenience method for resource creation endpoints. It uses the
-     * default message "Request created successful" and automatically sets the
+     * default message "Request created successfully" and automatically sets the
      * timestamp to the current instant.
      *
      * @param <T> the type of the response payload (typically the created resource)
